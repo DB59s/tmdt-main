@@ -1,0 +1,57 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Project Structure Guidelines
+
+## API Directory Structure
+
+The `api` directory is organized into three main components:
+
+### 1. Controllers
+Located in `api/controllers/` and divided into three subdirectories:
+- **admin/**: Controllers related to admin functionality and administrative operations
+- **customer/**: Controllers related to customer-facing functionality
+- **user/**: Controllers for user authentication, profile management, and admin user operations
+
+### 2. Models
+Located in `api/models/` containing all database schemas and models
+
+### 3. Routers
+Located in `api/routers/` and follows the same structure as controllers:
+- **admin/**: Routes for admin functionality
+- **customer/**: Routes for customer functionality
+- **user/**: Routes for user authentication and account management
+- **index.js**: Central file that imports and combines all routes for application-wide use
+
+## Config Directory
+The `config` directory contains configuration files for:
+- Database connection settings
+- Email service configuration
+- Other application-wide configurations
+
+## Middleware Directory
+The `middleware` directory contains:
+- Authentication middleware
+- Request validation helpers
+- Other supporting application middleware
+
+## Coding Guidelines
+
+1. Use consistent naming conventions:
+   - Filenames: camelCase
+   - Models: PascalCase
+   - Routes: kebab-case for paths
+
+2. Each controller should focus on a single resource or related set of functionality
+
+3. Keep routes and controller functions aligned - route names should clearly indicate the controller action
+
+4. Implement proper error handling in all controllers and routes
+
+5. Use middleware for cross-cutting concerns like authentication, validation, and logging
+
+6. Document all API endpoints with clear descriptions of inputs and outputs
+
+7. Follow the separation of concerns between controllers, models, and routes 

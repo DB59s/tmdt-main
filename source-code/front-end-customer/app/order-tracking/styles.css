@@ -1,0 +1,152 @@
+/* Order Tracking Styles */
+.order-tracking-form {
+  background-color: #f8f9fa;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.order-summary {
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Timeline Styles */
+.timeline {
+  position: relative;
+  padding-left: 30px;
+  margin-bottom: 30px;
+}
+
+.timeline:before {
+  content: '';
+  position: absolute;
+  left: 10px;
+  top: 0;
+  height: 100%;
+  width: 2px;
+  background-color: #dee2e6;
+}
+
+.timeline-item {
+  position: relative;
+  padding-bottom: 25px;
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
+}
+
+.timeline-item.active, 
+.timeline-item.completed {
+  opacity: 1;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -30px;
+  top: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #dee2e6;
+  border: 2px solid #fff;
+  z-index: 1;
+  transition: background-color 0.3s ease;
+}
+
+.timeline-item.active .timeline-dot {
+  background-color: #ffc107;
+  transform: scale(1.2);
+  box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.2);
+}
+
+.timeline-item.completed .timeline-dot {
+  background-color: #28a745;
+}
+
+.timeline-item.canceled .timeline-dot {
+  background-color: #dc3545;
+}
+
+.timeline-content {
+  padding-left: 15px;
+  padding-bottom: 5px;
+}
+
+.timeline-content h5 {
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+.timeline-content p {
+  margin-bottom: 0;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+/* Order Items Table */
+.order-items table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.order-items th {
+  background-color: #f8f9fa;
+  padding: 12px 15px;
+  font-weight: 600;
+  color: #495057;
+  text-align: left;
+}
+
+.order-items td {
+  padding: 12px 15px;
+  border-top: 1px solid #dee2e6;
+  vertical-align: middle;
+}
+
+.order-items tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.order-items tfoot {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+/* Buttons */
+.buttons .tp-btn {
+  margin-right: 10px;
+}
+
+/* Order Status Badges */
+.badge {
+  font-size: 0.9rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: 50px;
+}
+
+.badge-pill {
+  border-radius: 50px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 767px) {
+  .order-summary .row div {
+    margin-bottom: 15px;
+  }
+  
+  .order-tracking-form {
+    padding: 1.5rem;
+  }
+  
+  .timeline-content h5 {
+    font-size: 16px;
+  }
+  
+  .timeline-content p {
+    font-size: 13px;
+  }
+} 

@@ -1,0 +1,121 @@
+/* Refund Status Page Styles */
+
+/* Form Styles */
+.refund-status-form {
+  background-color: #f8f9fa;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+}
+
+/* Timeline Styles */
+.timeline {
+  position: relative;
+  margin: 20px 0;
+  padding: 0;
+}
+
+.timeline:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20px;
+  height: 100%;
+  width: 2px;
+  background-color: #e9ecef;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 30px;
+  padding-left: 50px;
+}
+
+.timeline-item:last-child {
+  margin-bottom: 0;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: 11px;
+  top: 5px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #dee2e6;
+  border: 3px solid #fff;
+  z-index: 1;
+}
+
+.timeline-item.completed .timeline-dot {
+  background-color: #28a745;
+}
+
+.timeline-item.canceled .timeline-dot {
+  background-color: #dc3545;
+}
+
+.timeline-content {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.timeline-content h6 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.timeline-content p {
+  margin-bottom: 5px;
+}
+
+.timeline-content small {
+  color: #6c757d;
+}
+
+/* Status Badge */
+.badge {
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0.35em 0.65em;
+}
+
+/* Card Styles */
+.refund-status-details .card {
+  border: none;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
+  margin-bottom: 30px;
+}
+
+.refund-status-details .card-header {
+  padding: 15px 20px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.refund-status-details .card-body {
+  padding: 25px;
+}
+
+.refund-status-details .card-footer {
+  background-color: #f8f9fa;
+  padding: 15px 25px;
+  border-top: 1px solid #e9ecef;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767px) {
+  .refund-status-form {
+    padding: 20px;
+  }
+  
+  .timeline-content {
+    padding: 12px;
+  }
+  
+  .refund-status-details .card-body {
+    padding: 15px;
+  }
+} 

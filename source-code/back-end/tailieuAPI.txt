@@ -1,0 +1,1022 @@
+# E-Commerce API Documentation
+
+## Base URL
+```
+https://your-api-domain.com/api
+```
+
+## Authentication
+Most customer endpoints can be accessed in two ways:
+- Anonymously with a device fingerprint (customerId in URL parameter)
+- Authenticated with JWT token in Authorization header (Bearer token)
+
+Admin endpoints require authentication with admin privileges.
+
+---
+
+## Customer API
+
+### Device Identification
+
+#### Identify Device
+```
+POST /customer/device/identify
+```
+
+Identifies a device and creates or retrieves a customer record.
+
+**Request Body:**
+```json
+{
+  "fingerprint": "unique-device-fingerprint-string",
+  "userAgent": "User-Agent string",
+  "ipAddress": "127.0.0.1",
+  "browser": "Chrome",
+  "os": "Windows",
+  "device": "Desktop",
+  "screen": {
+    "width": 1920,
+    "height": 1080
+  },
+  "language": "en-US",
+  "timezone": "America/New_York"
+}
+```
+
+**Response (New Customer):**
+```json
+{
+  "success": true,
+  "customerId": "customer-id",
+  "isNewCustomer": true,
+  "isRegistered": false
+}
+```
+
+**Response (Existing Customer):**
+```json
+{
+  "success": true,
+  "customerId": "customer-id",
+  "isNewCustomer": false,
+  "isRegistered": true
+}
+```
+
+---
+
+### Customer Profile
+
+#### Get Profile
+```
+GET /customer/profile/:customerId?
+```
+
+Retrieves customer profile information.
+
+**Headers (Optional):**
+```
+Authorization: Bearer <jwt-token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "_id": "customer-id",
+    "email": "customer@example.com",
+    "name": "John Doe",
+    "phoneNumber": "1234567890",
+    "isRegistered": true,
+    "defaultShippingAddress": {
+      "street": "123 Main St",
+      "city": "Anytown",
+      "state": "CA",
+      "zipCode": "12345",
+      "country": "USA"
+    },
+    "createdAt": "2023-01-01T00:00:00.000Z",
+    "lastActivity": "2023-01-02T00:00:00.000Z"
+  }
+}
+```
+
+#### Update Profile
+```
+PUT /customer/profile/:customerId?
+```
+
+Updates customer profile information.
+
+**Headers (Optional):**
+```
+Authorization: Bearer <jwt-token>
+```
+
+**Request Body:**
+```json
+{
+  "name": "John Doe",
+  "phoneNumber": "1234567890",
+  "defaultShippingAddress": {
+    "street": "123 Main St",
+    "city": "Anytown",
+    "state": "CA",
+    "zipCode": "12345",
+    "country": "USA"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Profile updated successfully",
+  "data": {
+    "_id": "customer-id",
+    "name": "John Doe",
+    "phoneNumber": "1234567890",
+    "defaultShippingAddress": {
+      "street": "123 Main St",
+      "city": "Anytown",
+      "state": "CA",
+      "zipCode": "12345",
+      "country": "USA"
+    }
+  }
+}
+```
+
+#### Register (Convert Anonymous to Registered)
+```
+POST /customer/profile/register/:customerId?
+```
+
+Converts an anonymous customer to a registered account.
+
+**Request Body:**
+```json
+{
+  "email": "customer@example.com",
+  "password": "securepassword",
+  "name": "John Doe",
+  "phoneNumber": "1234567890"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Registration successful",
+  "token": "jwt-token",
+  "customerId": "customer-id"
+}
+```
+
+#### Login
+```
+POST /customer/profile/login
+```
+
+Authenticates a registered customer.
+
+**Request Body:**
+```json
+{
+  "email": "customer@example.com",
+  "password": "securepassword"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Login successful",
+  "token": "jwt-token",
+  "customerId": "customer-id"
+}
+```
+
+---
+
+### Shopping Cart
+
+#### Get Cart
+```
+GET /customer/cart/:customerId?
+```
+
+Retrieves the customer's active shopping cart.
+
+**Headers (Optional):**
+```
+Authorization: Bearer <jwt-token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "_id": "cart-id",
+    "customerId": "customer-id",
+    "items": [
+      {
+        "productId": {
+          "_id": "product-id",
+          "name": "Product Name",
+          "price": 29.99,
+          "image": "product-image-url.jpg",
+          "stock": 10
+        },
+        "quantity": 2,
+        "price": 29.99,
+        "name": "Product Name",
+        "image": "product-image-url.jpg",
+        "addedAt": "2023-01-01T00:00:00.000Z"
+      }
+    ],
+    "status": "active",
+    "createdAt": "2023-01-01T00:00:00.000Z",
+    "updatedAt": "2023-01-01T00:00:00.000Z",
+    "totalItems": 2,
+    "totalAmount": 59.98
+  }
+}
+```
+
+#### Add Item to Cart
+```
+POST /customer/cart/items/:customerId?
+```
+
+Adds an item to the shopping cart.
+
+**Headers (Optional):**
+```
+Authorization: Bearer <jwt-token>
+```
+
+**Request Body:**
+```json
+{
+  "productId": "product-id",
+  "quantity": 1
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Item added to cart",
+  "data": {
+    "_id": "cart-id",
+    "customerId": "customer-id",
+    "items": [ ... ],
+    "totalItems": 3,
+    "totalAmount": 89.97
+  }
+}
+```
+
+#### Update Item Quantity
+```
+PUT /customer/cart/items/:productId/:customerId?
+```
+
+Updates the quantity of an item in the cart.
+
+**Headers (Optional):**
+```
+Authorization: Bearer <jwt-token>
+```
+
+**Request Body:**
+```json
+{
+  "quantity": 3
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Item quantity updated",
+  "data": {
+    "_id": "cart-id",
+    "customerId": "customer-id",
+    "items": [ ... ],
+    "totalItems": 4,
+    "totalAmount": 119.96
+  }
+}
+```
+
+#### Remove Item from Cart
+```
+DELETE /customer/cart/items/:productId/:customerId?
+```
+
+Removes an item from the cart.
+
+**Headers (Optional):**
+```
+Authorization: Bearer <jwt-token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Item removed from cart",
+  "data": {
+    "_id": "cart-id",
+    "customerId": "customer-id",
+    "items": [ ... ],
+    "totalItems": 1,
+    "totalAmount": 29.99
+  }
+}
+```
+
+#### Clear Cart
+```
+DELETE /customer/cart/:customerId?
+```
+
+Removes all items from the cart.
+
+**Headers (Optional):**
+```
+Authorization: Bearer <jwt-token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Cart cleared",
+  "data": {
+    "_id": "cart-id",
+    "customerId": "customer-id",
+    "items": [],
+    "totalItems": 0,
+    "totalAmount": 0
+  }
+}
+```
+
+---
+
+### Products
+
+#### Get All Products
+```
+GET /customer/products
+```
+
+Returns a list of all available products.
+
+**Query Parameters:**
+- `page`: Page number (default: 1)
+- `limit`: Number of products per page (default: 10)
+- `sort`: Sort field (e.g., "price", "name")
+- `order`: Sort order ("asc" or "desc")
+- `category`: Filter by category ID
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "products": [ ... ],
+    "page": 1,
+    "limit": 10,
+    "totalProducts": 100,
+    "totalPages": 10
+  }
+}
+```
+
+#### Get Product by ID
+```
+GET /customer/products/:productId
+```
+
+Returns details of a specific product.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "_id": "product-id",
+    "name": "Product Name",
+    "description": "Product description",
+    "price": 29.99,
+    "images": [ ... ],
+    "category": { ... },
+    "stock": 10,
+    "reviews": [ ... ]
+  }
+}
+```
+
+---
+
+### Orders
+
+#### Create Order
+```
+POST /customer/orders/:customerId?
+```
+
+Creates a new order from the customer's active cart.
+
+**Headers (Optional):**
+```
+Authorization: Bearer <jwt-token>
+```
+
+**Request Body:**
+```json
+{
+  "shippingAddress": {
+    "street": "123 Main St",
+    "city": "Anytown",
+    "state": "CA",
+    "zipCode": "12345",
+    "country": "USA"
+  },
+  "paymentMethod": "credit_card",
+  "paymentDetails": { ... }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Order created successfully",
+  "data": {
+    "orderId": "order-id",
+    "totalAmount": 59.98,
+    "status": "pending"
+  }
+}
+```
+
+#### Get Order History
+```
+GET /customer/orders/:customerId?
+```
+
+Returns the customer's order history.
+
+**Headers (Optional):**
+```
+Authorization: Bearer <jwt-token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "orders": [ ... ],
+    "totalOrders": 5
+  }
+}
+```
+
+#### Get Order Details
+```
+GET /customer/orders/:orderId/:customerId?
+```
+
+Returns details of a specific order.
+
+**Headers (Optional):**
+```
+Authorization: Bearer <jwt-token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "_id": "order-id",
+    "customerId": "customer-id",
+    "items": [ ... ],
+    "shippingAddress": { ... },
+    "totalAmount": 59.98,
+    "status": "shipped",
+    "trackingNumber": "tracking123",
+    "createdAt": "2023-01-01T00:00:00.000Z"
+  }
+}
+```
+
+---
+
+### Reviews
+
+#### Get Product Reviews
+```
+GET /customer/reviews/product/:productId
+```
+
+Returns reviews for a specific product.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "reviews": [ ... ],
+    "averageRating": 4.5,
+    "totalReviews": 10
+  }
+}
+```
+
+#### Add Review
+```
+POST /customer/reviews/:customerId?
+```
+
+Adds a review for a product.
+
+**Headers (Optional):**
+```
+Authorization: Bearer <jwt-token>
+```
+
+**Request Body:**
+```json
+{
+  "productId": "product-id",
+  "rating": 5,
+  "comment": "Great product!"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Review added successfully",
+  "data": {
+    "_id": "review-id",
+    "productId": "product-id",
+    "customerId": "customer-id",
+    "rating": 5,
+    "comment": "Great product!",
+    "createdAt": "2023-01-01T00:00:00.000Z"
+  }
+}
+```
+
+---
+
+### Categories
+
+#### Get All Categories
+```
+GET /customer/categories
+```
+
+Returns a list of all product categories.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "categories": [
+      {
+        "_id": "category-id",
+        "name": "Category Name",
+        "description": "Category description",
+        "image": "category-image-url.jpg"
+      }
+    ]
+  }
+}
+```
+
+#### Get Category by ID
+```
+GET /customer/categories/:categoryId
+```
+
+Returns details of a specific category and its products.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "category": {
+      "_id": "category-id",
+      "name": "Category Name",
+      "description": "Category description",
+      "image": "category-image-url.jpg"
+    },
+    "products": [ ... ]
+  }
+}
+```
+
+---
+
+### Discounts
+
+#### Get Active Discounts
+```
+GET /customer/discount/active
+```
+
+Returns a list of currently active discounts.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "discounts": [
+      {
+        "_id": "discount-id",
+        "code": "SUMMER20",
+        "description": "20% off summer items",
+        "discountType": "percentage",
+        "discountValue": 20,
+        "validFrom": "2023-06-01T00:00:00.000Z",
+        "validTo": "2023-08-31T23:59:59.000Z",
+        "isActive": true
+      }
+    ]
+  }
+}
+```
+
+#### Apply Discount to Cart
+```
+POST /customer/discount/apply/:customerId?
+```
+
+Applies a discount to the customer's cart.
+
+**Headers (Optional):**
+```
+Authorization: Bearer <jwt-token>
+```
+
+**Request Body:**
+```json
+{
+  "code": "SUMMER20"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Discount applied successfully",
+  "data": {
+    "cart": { ... },
+    "discount": {
+      "code": "SUMMER20",
+      "discountType": "percentage",
+      "discountValue": 20,
+      "amountSaved": 12.00
+    },
+    "totalAfterDiscount": 47.98
+  }
+}
+```
+
+---
+
+## Admin API
+
+### Products Management
+
+#### Get All Products (Admin)
+```
+GET /admin/products
+```
+
+Returns a list of all products with inventory details.
+
+**Headers:**
+```
+Authorization: Bearer <jwt-token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "products": [ ... ],
+    "totalProducts": 100
+  }
+}
+```
+
+#### Add Product
+```
+POST /admin/products
+```
+
+Adds a new product.
+
+**Headers:**
+```
+Authorization: Bearer <jwt-token>
+```
+
+**Request Body:**
+```json
+{
+  "name": "New Product",
+  "description": "Product description",
+  "price": 29.99,
+  "images": [ ... ],
+  "categoryId": "category-id",
+  "stock": 10
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Product added successfully",
+  "data": {
+    "_id": "product-id",
+    "name": "New Product",
+    "description": "Product description",
+    "price": 29.99,
+    "images": [ ... ],
+    "category": "category-id",
+    "stock": 10,
+    "createdAt": "2023-01-01T00:00:00.000Z"
+  }
+}
+```
+
+#### Update Product
+```
+PUT /admin/products/:productId
+```
+
+Updates an existing product.
+
+**Headers:**
+```
+Authorization: Bearer <jwt-token>
+```
+
+**Request Body:**
+```json
+{
+  "name": "Updated Product Name",
+  "price": 39.99,
+  "stock": 15
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Product updated successfully",
+  "data": {
+    "_id": "product-id",
+    "name": "Updated Product Name",
+    "price": 39.99,
+    "stock": 15
+  }
+}
+```
+
+#### Delete Product
+```
+DELETE /admin/products/:productId
+```
+
+Deletes a product.
+
+**Headers:**
+```
+Authorization: Bearer <jwt-token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Product deleted successfully"
+}
+```
+
+---
+
+### Orders Management
+
+#### Get All Orders (Admin)
+```
+GET /admin/orders
+```
+
+Returns a list of all orders for admin management.
+
+**Headers:**
+```
+Authorization: Bearer <jwt-token>
+```
+
+**Query Parameters:**
+- `status`: Filter by order status (e.g., "pending", "processing", "shipped")
+- `from`: Start date (YYYY-MM-DD)
+- `to`: End date (YYYY-MM-DD)
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "orders": [ ... ],
+    "totalOrders": 50
+  }
+}
+```
+
+#### Update Order Status
+```
+PUT /admin/orders/:orderId/status
+```
+
+Updates the status of an order.
+
+**Headers:**
+```
+Authorization: Bearer <jwt-token>
+```
+
+**Request Body:**
+```json
+{
+  "status": "shipped",
+  "trackingNumber": "tracking123"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Order status updated successfully",
+  "data": {
+    "_id": "order-id",
+    "status": "shipped",
+    "trackingNumber": "tracking123",
+    "updatedAt": "2023-01-02T00:00:00.000Z"
+  }
+}
+```
+
+---
+
+### Discount Management
+
+#### Create Discount
+```
+POST /admin/discounts
+```
+
+Creates a new discount code.
+
+**Headers:**
+```
+Authorization: Bearer <jwt-token>
+```
+
+**Request Body:**
+```json
+{
+  "code": "SUMMER20",
+  "description": "20% off summer items",
+  "discountType": "percentage",
+  "discountValue": 20,
+  "validFrom": "2023-06-01T00:00:00.000Z",
+  "validTo": "2023-08-31T23:59:59.000Z",
+  "isActive": true
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Discount created successfully",
+  "data": {
+    "_id": "discount-id",
+    "code": "SUMMER20",
+    "description": "20% off summer items",
+    "discountType": "percentage",
+    "discountValue": 20,
+    "validFrom": "2023-06-01T00:00:00.000Z",
+    "validTo": "2023-08-31T23:59:59.000Z",
+    "isActive": true,
+    "createdAt": "2023-01-01T00:00:00.000Z"
+  }
+}
+```
+
+#### Update Discount
+```
+PUT /admin/discounts/:discountId
+```
+
+Updates an existing discount.
+
+**Headers:**
+```
+Authorization: Bearer <jwt-token>
+```
+
+**Request Body:**
+```json
+{
+  "discountValue": 25,
+  "isActive": false
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Discount updated successfully",
+  "data": {
+    "_id": "discount-id",
+    "code": "SUMMER20",
+    "discountValue": 25,
+    "isActive": false,
+    "updatedAt": "2023-01-02T00:00:00.000Z"
+  }
+}
+```
+
+#### Delete Discount
+```
+DELETE /admin/discounts/:discountId
+```
+
+Deletes a discount.
+
+**Headers:**
+```
+Authorization: Bearer <jwt-token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Discount deleted successfully"
+}
+```
+
+---
+
+## Status Codes
+
+- 200: OK - Request succeeded
+- 201: Created - Resource created successfully
+- 400: Bad Request - Invalid request parameters
+- 401: Unauthorized - Authentication required or failed
+- 403: Forbidden - Not authorized to access the resource
+- 404: Not Found - Resource not found
+- 500: Internal Server Error - Server-side error occurred
+
+## Error Response Format
+
+```json
+{
+  "success": false,
+  "message": "Error message describing what went wrong",
+  "error": "Detailed error information (in development mode)"
+}
+```

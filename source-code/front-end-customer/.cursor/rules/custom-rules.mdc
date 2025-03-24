@@ -1,0 +1,72 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Your rule content
+
+Ninico Next.js E-commerce Project Guidelines
+Project Structure
+Folder Organization
+app/: Contains all page routes based on Next.js 14's App Router
+Each route is a directory with its own page.js file
+Multiple layout variations: index-2, index-3, etc.
+Special pages: not-found.js, loading.js
+components/: Reusable UI components organized by category
+elements/: Basic UI components (e.g., CountDown, buttons)
+layout/: Layout components (header, footer, etc.)
+sections/: Page sections
+shop/: E-commerce specific components
+filter/: Product filtering components
+blog/: Blog related components
+data/: JSON data files for the application
+products.json: Contains all product information
+public/: Static assets (images, CSS, JavaScript)
+assets/scss/: SASS files
+assets/css/: Compiled CSS
+features/: Redux store and state management logic
+util/: Utility functions and helpers
+Routing Configuration
+The project uses Next.js 14 App Router pattern
+Each route is defined by a directory inside the app/ folder
+Each page requires a page.js file to be accessible
+Multiple layout variations are implemented as different folders (index-2, index-3, etc.)
+The main layout is defined in app/layout.js
+For dynamic routes, use folders with square brackets, e.g., [productId]/
+Component Guidelines
+Components should be organized by function in appropriate subdirectories
+Use 'use client' directive for components that need client-side interactivity
+All UI components should be in the components/ directory
+Layout components should be placed in components/layout/
+Follow the pattern established for similar components
+State Management
+Redux is used for global state management via @reduxjs/toolkit
+The store is configured in features/store.js
+Wrap components requiring Redux state with the Provider component
+Data Handling
+Product data is stored in data/products.json
+Use React hooks for local state management
+For components with server/client hydration issues (like CountDown):
+Use the useEffect hook for initialization
+Track mounted state
+Use null initial values and render placeholders until client-side hydration
+Styling
+Utilizes SASS for styling with a preprocessor
+Main styling in public/assets/scss/main.scss
+CSS files organized in public/assets/css/
+Additional frameworks: Bootstrap, FontAwesome
+Custom spacing in spacing.css
+Client-Side Components
+For components that run client-side calculations or use browser APIs:
+Add 'use client' directive at the top of the file
+Handle server/client hydration carefully with proper state initialization
+Use useEffect for timers, data fetching, and DOM interactions
+Add mounted state checks before rendering dynamic content
+Countdown Component Rules
+For timer components that may cause hydration errors:
+Initialize with null values
+Track component mounting with useState(false)
+Only show real values after client-side mounting
+Use setInterval for regular updates
+Clean up intervals on component unmount
