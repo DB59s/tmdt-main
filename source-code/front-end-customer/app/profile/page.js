@@ -45,7 +45,7 @@ const ProfilePage = () => {
   const fetchProfile = async (token, customerId) => {
     setLoading(true)
     try {
-      let url = `http://localhost:8080/api/customer/profile`
+      let url = `${process.env.domainApi}/api/customer/profile`
       if (customerId) url += `/${customerId}`
       
       const response = await fetch(url, {
@@ -107,7 +107,7 @@ const ProfilePage = () => {
     setUpdateSuccess(false)
     
     try {
-      let url = `http://localhost:8080/api/customer/profile`
+      let url = `${process.env.domainApi}/api/customer/profile`
       if (customerId) url += `/${customerId}`
       
       const response = await fetch(url, {

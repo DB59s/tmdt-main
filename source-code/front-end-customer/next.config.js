@@ -10,7 +10,8 @@ const nextConfig = {
     pagesBufferLength: 4,
   },
   env: {
-    domainApi: 'http://localhost:8080'
+    // domainApi: 'http://localhost:8080'
+    domainApi: 'https://vuquangduy.io.vn'
     }
 }
 

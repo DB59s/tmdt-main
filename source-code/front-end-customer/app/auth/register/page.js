@@ -30,7 +30,7 @@ const RegisterPage = () => {
   const identifyDevice = async () => {
     try {
       const fingerprint = generateFingerprint() // You would implement this function
-      const response = await fetch('http://localhost:8080/api/customer/device/identify', {
+      const response = await fetch(`${process.env.domainApi}/api/customer/device/identify`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -109,8 +109,8 @@ const RegisterPage = () => {
     try {
       // Use the register endpoint with the customerId if available
       const url = customerId 
-        ? `http://localhost:8080/api/customer/profile/register/${customerId}` 
-        : `http://localhost:8080/api/customer/profile/register`
+        ? `${process.env.domainApi}/api/customer/profile/register/${customerId}` 
+        : `${process.env.domainApi}/api/customer/profile/register`
       
       const response = await fetch(url, {
         method: 'POST',

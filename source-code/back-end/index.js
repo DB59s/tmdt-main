@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const router = require('./api/routers/index');
+const path = require('path');
 
 const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development';
 require('dotenv').config({ path: envFile });
@@ -24,8 +25,12 @@ app.use(cors(corsOptions));
 // Middleware để xử lý preflight requests
 app.options('*', cors(corsOptions));
 
-// Middleware để xử lý JSON
-app.use(express.json());
+// Middleware để xử lý JSON và tăng giới hạn kích thước request body
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Thiết lập thư mục uploads để truy cập tĩnh
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 router(app);
 app.get('/', (req, res) => {

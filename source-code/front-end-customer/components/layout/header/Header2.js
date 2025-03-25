@@ -89,7 +89,7 @@ export default function Header2({ scroll, isMobileMenu, handleMobileMenu, isCart
                                                             <li><Link href="/shop-details-2">Shop Details 2</Link></li>
                                                             <li><Link href="/shop-location">Shop Location</Link></li>
                                                             <li><Link href="/cart">Cart</Link></li>
-                                                            <li><Link href="/sign-in">Sign In</Link></li>
+                                                            {/* <li><Link href="/sign-in">Sign In</Link></li> */}
                                                             <li><Link href="/checkout">Checkout</Link></li>
                                                             <li><Link href="/wishlist">Wishlist</Link></li>
                                                             <li><Link href="/track">Product Track</Link></li>
@@ -160,7 +160,7 @@ export default function Header2({ scroll, isMobileMenu, handleMobileMenu, isCart
                                             <i className="fal fa-shopping-cart" />
                                             <CartShow />
                                         </button>
-                                        <Link href="/sign-in"><i className="fal fa-user" /></Link>
+                                        {/* <Link href="/sign-in"><i className="fal fa-user" /></Link> */}
                                         <Link href="/wishlist" className="header-cart p-relative tp-cart-toggle">
                                             <i className="fal fa-heart" />
                                             <WishListShow />

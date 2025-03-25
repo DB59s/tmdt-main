@@ -26,7 +26,7 @@ const LoginPage = () => {
     setError('')
     
     try {
-      const response = await fetch('http://localhost:8080/api/customer/profile/login', {
+      const response = await fetch(`${process.env.domainApi}/api/customer/profile/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

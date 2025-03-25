@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const path = require('path');
 
 const productRouter = require('./customer/Product/product.router');
 const ordersRouter = require('./customer/Order/orders.router');
@@ -12,24 +13,37 @@ const productAdminRouter = require('./admin/Product/product.admin.router');
 const ordersAdminRouter = require('./admin/Order/orders.admin.router');
 const discountAdminRouter = require('./admin/Discount/discount');
 const refundRequestAdminRouter = require('./admin/RefundRequest/index');
+const returnRequestAdminRouter = require('./admin/ReturnRequest/returnRequest.admin.router');
+const uploadRouter = require('./upload.router');
 
 // New customer routes for device identification, profile, and cart
 const deviceRouter = require('./customer/Device');
 const profileRouter = require('./customer/Profile');
 const cartRouter = require('./customer/Cart');
+const wishlistRouter = require('./customer/Wishlist/wishlist.router');
+const returnRequestRouter = require('./customer/ReturnRequest/returnRequest.router');
 
 module.exports = (app) => {
+    // Thiết lập thư mục uploads là thư mục tĩnh để truy cập các file đã upload
+    app.use('/uploads', express.static(path.join(__dirname, '../../uploads')));
+    
     app.use('/api/user', userRouter);
     app.use('/api' , LoginRouter);
     app.use('/api/admin/products', productAdminRouter);
     app.use('/api/admin/orders', ordersAdminRouter);
     app.use('/api/admin/discounts', discountAdminRouter);
     app.use('/api/admin/refund-requests', refundRequestAdminRouter);
+    app.use('/api/admin/return-requests', returnRequestAdminRouter);
     
-    // New customer routes for device identification, profile, and cart
+    // API upload file
+    app.use('/api/upload', uploadRouter);
+    
+    // New customer routes for device identification, profile, cart, and wishlist
     app.use('/api/customer/device', deviceRouter);
     app.use('/api/customer/profile', profileRouter);
     app.use('/api/customer/cart', cartRouter);
+    app.use('/api/customer/wishlist', wishlistRouter);
+    app.use('/api/customer/return-requests', returnRequestRouter);
     app.use('/api/customer/products', productRouter);
     app.use('/api/customer/orders', ordersRouter);
     app.use('/api/customer/categories', categoryRouter);

@@ -1,7 +1,30 @@
-
+'use client'
 import Link from "next/link"
+import { useState, useEffect } from "react"
 
 export default function Category() {
+    const [categories, setCategories] = useState([])
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        fetchTopCategories()
+    }, [])
+
+    const fetchTopCategories = async () => {
+        try {
+            const response = await fetch(`${process.env.domainApi}/api/customer/products/top-categories`)
+            const data = await response.json()
+            
+            if (data && data.categories) {
+                setCategories(data.categories)
+            }
+        } catch (error) {
+            console.error('Failed to fetch top categories:', error)
+        } finally {
+            setLoading(false)
+        }
+    }
+
     return (
         <>
             <section className="category-area pt-70">
@@ -14,60 +37,32 @@ export default function Category() {
                         </div>
                     </div>
                     <div className="custom-row category-border pb-45 justify-content-xl-between">
-                        <div className="tpcategory mb-40">
-                            <div className="tpcategory__icon p-relative">
-                                <img src="/assets/img/svg/cat01.svg" alt="" className="fn__svg" />
-                                <span>20</span>
+                        {loading ? (
+                            <div className="text-center py-5 w-100">
+                                <div className="spinner-border" role="status">
+                                    <span className="visually-hidden">Loading...</span>
+                                </div>
                             </div>
-                            <div className="tpcategory__content">
-                                <h5 className="tpcategory__title"><Link href="/shop">Driftwood <br /> Table Decor</Link></h5>
-                            </div>
-                        </div>
-                        <div className="tpcategory mb-40">
-                            <div className="tpcategory__icon">
-                                <img src="/assets/img/svg/cat02.svg" alt="" className="fn__svg" />
-                                <span>12</span>
-                            </div>
-                            <div className="tpcategory__content">
-                                <h5 className="tpcategory__title"><Link href="/shop">Floor Driftwood <br /> Sculpture</Link></h5>
-                            </div>
-                        </div>
-                        <div className="tpcategory mb-40">
-                            <div className="tpcategory__icon">
-                                <img src="/assets/img/svg/cat03.svg" alt="" className="fn__svg" />
-                                <span>03</span>
-                            </div>
-                            <div className="tpcategory__content">
-                                <h5 className="tpcategory__title"><Link href="/shop">Driftwood <br /> Christmas Tree </Link></h5>
-                            </div>
-                        </div>
-                        <div className="tpcategory mb-40">
-                            <div className="tpcategory__icon">
-                                <img src="/assets/img/svg/cat04.svg" alt="" className="fn__svg" />
-                                <span>09</span>
-                            </div>
-                            <div className="tpcategory__content">
-                                <h5 className="tpcategory__title"><Link href="/shop"> Wooden <br /> Bluetooth Speaker </Link></h5>
-                            </div>
-                        </div>
-                        <div className="tpcategory mb-40">
-                            <div className="tpcategory__icon">
-                                <img src="/assets/img/svg/cat05.svg" alt="" className="fn__svg" />
-                                <span>10</span>
-                            </div>
-                            <div className="tpcategory__content">
-                                <h5 className="tpcategory__title"><Link href="/shop">Receivers <br />  Amplifiers</Link></h5>
-                            </div>
-                        </div>
-                        <div className="tpcategory mb-40">
-                            <div className="tpcategory__icon">
-                                <img src="/assets/img/svg/cat06.svg" alt="" className="fn__svg" />
-                                <span>05</span>
-                            </div>
-                            <div className="tpcategory__content">
-                                <h5 className="tpcategory__title"><Link href="/shop">Appetizer <br /> Plate Set </Link></h5>
-                            </div>
-                        </div>
+                        ) : (
+                            categories.map((category) => (
+                                <div className="tpcategory mb-40" key={category._id}>
+                                    <div className="tpcategory__icon p-relative">
+                                        <img 
+                                            src={category.thumbnail || "/assets/img/svg/cat01.svg"} 
+                                            alt={category.name} 
+                                            className={category.thumbnail ? "" : "fn__svg"} 
+                                            style={{ maxHeight: "50px", objectFit: "contain" }}
+                                        />
+                                        <span>{category.productCount}</span>
+                                    </div>
+                                    <div className="tpcategory__content">
+                                        <h5 className="tpcategory__title">
+                                            <Link href={`/shop?category=${category._id}`}>{category.name}</Link>
+                                        </h5>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
             </section>

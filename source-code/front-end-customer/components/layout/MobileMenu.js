@@ -48,7 +48,7 @@ export default function MobileMenu() {
                                     <li><Link href="/shop-details-2">Shop Details 2</Link></li>
                                     <li><Link href="/shop-location">Shop Location</Link></li>
                                     <li><Link href="/cart">Cart</Link></li>
-                                    <li><Link href="/sign-in">Sign In</Link></li>
+                                    {/* <li><Link href="/sign-in">Sign In</Link></li> */}
                                     <li><Link href="/checkout">Checkout</Link></li>
                                     <li><Link href="/wishlist">Wishlist</Link></li>
                                     <li><Link href="/track">Product Track</Link></li>
@@ -68,8 +68,8 @@ export default function MobileMenu() {
                                     <li><Link href="/about">About</Link></li>
                                     <li><Link href="/cart">Cart</Link></li>
                                     <li><Link href="/checkout">Checkout</Link></li>
-                                    <li><Link href="/sign-in">Sign In</Link></li>
-                                    <li><Link href="/sign-in">Log In</Link></li>
+                                    {/* <li><Link href="/sign-in">Sign In</Link></li> */}
+                                    {/* <li><Link href="/sign-in">Log In</Link></li> */}
 
                                     <li><Link href="/track">Product Track</Link></li>
                                     <li><Link href="/wishlist">Wishlist</Link></li>
@@ -79,6 +79,8 @@ export default function MobileMenu() {
                                 </ul>
                                 <Link className="mean-expand" onClick={() => handleClick(3)} href="#" style={{ fontSize: 18 }}><i className="fal fa-plus" /></Link>
                             </li>
+                            <li><Link href="/my-order">My Order</Link></li>
+                            <li><Link href="/my-returns">My Returns</Link></li>
                             <li className="has-dropdown">
                                 <Link href="/blog">Blog</Link>
                                 <ul className="submenu" style={{ display: `${isActive.key == 4 ? "block" : "none"}` }}>

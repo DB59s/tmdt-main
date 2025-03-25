@@ -85,6 +85,8 @@ export const shopSlice = createSlice({
                     id: item.productId?._id || item.productId,
                     title: item.name,
                     price: { max: item.price },
+                    priceBeforeSale: item.priceBeforeSale,
+                    onSale: item.onSale,
                     qty: item.quantity,
                     imgf: item.image?.split('/').pop() || 'placeholder.jpg'
                 }));
@@ -110,6 +112,8 @@ export const shopSlice = createSlice({
                         id: item.productId?._id || item.productId,
                         title: item.name,
                         price: { max: item.price },
+                        priceBeforeSale: item.priceBeforeSale,
+                        onSale: item.onSale,
                         qty: item.quantity,
                         imgf: item.image?.split('/').pop() || 'placeholder.jpg'
                     }));

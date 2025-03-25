@@ -41,7 +41,7 @@ export default function Shop() {
                         <div className="col-md-12">
                             <div className="tpsectionarea text-center mb-35">
                                 <h5 className="tpsectionarea__subtitle">Follow On</h5>
-                                <h4 className="tpsectionarea__title"><i className="fab fa-instagram" /> ninico-shop</h4>
+                                <h4 className="tpsectionarea__title"><i className="fab fa-instagram" /> DuyKhien-shop</h4>
                             </div>
                         </div>
                     </div>

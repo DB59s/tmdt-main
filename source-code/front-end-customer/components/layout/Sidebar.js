@@ -40,7 +40,7 @@ export default function Sidebar({ isMobileMenu, handleMobileMenu }) {
                     </div>
                 </div>
                 <div className="tpsideinfo__account-link">
-                    <Link href="/sign-in"><i className="fal fa-user" /> Login / Register</Link>
+                    {/* <Link href="/sign-in"><i className="fal fa-user" /> Login / Register</Link> */}
                 </div>
                 <div className="tpsideinfo__wishlist-link">
                     <Link href="/wishlist" target="_parent"><i className="fal fa-heart" /> Wishlist</Link>

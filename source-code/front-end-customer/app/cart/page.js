@@ -170,7 +170,8 @@ export default function Cart() {
     
     // Calculate totals
     const subtotal = cart?.items?.reduce((acc, item) => {
-        return acc + (item.price * item.quantity)
+        const priceToUse = item.onSale ? item.price : (item.priceBeforeSale || item.price)
+        return acc + (priceToUse * item.quantity)
     }, 0) || 0
     
     // You can add tax, shipping, discounts calculation here
@@ -232,7 +233,16 @@ export default function Cart() {
                                                                     {item.name}
                                                                 </Link>
                                                             </td>
-                                                            <td className="product-price">${item.price?.toFixed(2)}</td>
+                                                            <td className="product-price">
+                                                                {item.onSale ? (
+                                                                    <>
+                                                                        <del>${(item.priceBeforeSale || 0).toFixed(2)}</del>
+                                                                        <span>${(item.price || 0).toFixed(2)}</span>
+                                                                    </>
+                                                                ) : (
+                                                                    <span>${(item.priceBeforeSale || item.price || 0).toFixed(2)}</span>
+                                                                )}
+                                                            </td>
                                                             <td className="product-quantity">
                                                                 <div className="item-quantity">
                                                                     <input
@@ -251,7 +261,7 @@ export default function Cart() {
                                                             </td>
                                                             <td className="product-subtotal">
                                                                 <span className="amount">
-                                                                    ${(item.price * item.quantity).toFixed(2)}
+                                                                    ${((item.onSale ? item.price : (item.priceBeforeSale || item.price)) * item.quantity).toFixed(2)}
                                                                 </span>
                                                             </td>
                                                             <td className="product-remove">

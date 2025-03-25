@@ -69,7 +69,17 @@ module.exports.createOrder = async (req, res) => {
         // Calculate total amount from items
         let calculatedTotalAmount = 0;
         for (const item of items) {
-            calculatedTotalAmount += item.price * item.quantity;
+            // Lấy thông tin sản phẩm từ database để xác định đúng giá và trạng thái giảm giá
+            const product = await Product.findById(item.productId);
+            if (product) {
+                // Nếu sản phẩm đang giảm giá (onSale = true), sử dụng giá đã giảm (price)
+                // Nếu không (onSale = false), sử dụng giá gốc (priceBeforeSale)
+                const priceToUse = product.onSale ? product.price : product.priceBeforeSale;
+                calculatedTotalAmount += priceToUse * item.quantity;
+            } else {
+                // Nếu không tìm thấy sản phẩm, sử dụng giá từ request
+                calculatedTotalAmount += item.price * item.quantity;
+            }
         }
 
         // Store original amount before any discounts
@@ -147,11 +157,31 @@ module.exports.createOrder = async (req, res) => {
         }
 
         // Create order items
-        const orderItems = items.map(item => ({
-            orderId: order._id,
-            productId: item.productId,
-            quantity: item.quantity,
-            price: item.price
+        const orderItems = await Promise.all(items.map(async item => {
+            const product = await Product.findById(item.productId);
+            if (product) {
+                // Xác định giá đúng dựa trên trạng thái khuyến mãi
+                const priceToUse = product.onSale ? product.price : product.priceBeforeSale;
+                
+                return {
+                    orderId: order._id,
+                    productId: item.productId,
+                    quantity: item.quantity,
+                    price: priceToUse, // Lưu giá đúng vào đơn hàng
+                    priceBeforeSale: product.priceBeforeSale, // Luôn lưu giá gốc
+                    onSale: product.onSale
+                };
+            } else {
+                // Nếu không tìm thấy sản phẩm, sử dụng giá từ request
+                return {
+                    orderId: order._id,
+                    productId: item.productId,
+                    quantity: item.quantity,
+                    price: item.price,
+                    priceBeforeSale: item.priceBeforeSale || item.price,
+                    onSale: item.onSale || false
+                };
+            }
         }));
 
         // Update product stock

@@ -15,7 +15,9 @@ const FilterShopBox = ({
   setPriceRange,
   categories = [],
   loading = false,
-  handleCategorySelect
+  handleCategorySelect,
+  handleOnSaleChange,
+  onSale = null
 }) => {
   const [sort, setSort] = useState('newest')
   const [perPage, setPerPage] = useState(12)
@@ -76,9 +78,15 @@ const FilterShopBox = ({
               <button 
                 className="filter-toggle-btn ms-3" 
                 onClick={toggleFilters}
-                style={{ border: "none", background: "#f9f9f9", padding: "5px 15px", borderRadius: "4px" }}
+                style={{ 
+                  border: "none", 
+                  background: showFilters ? "#f0f0f0" : "#f9f9f9", 
+                  padding: "5px 15px", 
+                  borderRadius: "4px",
+                  boxShadow: showFilters ? "inset 0 0 5px rgba(0,0,0,0.1)" : "none"
+                }}
               >
-                <i className="fa fa-filter me-2"></i>
+                <i className={`fa ${showFilters ? 'fa-times' : 'fa-filter'} me-2`}></i>
                 {showFilters ? 'Hide Filters' : 'Show Filters'}
               </button>
             </div>
@@ -97,6 +105,7 @@ const FilterShopBox = ({
                   <option value="price-high">Price (High to Low)</option>
                   <option value="name-asc">Name (A-Z)</option>
                   <option value="name-desc">Name (Z-A)</option>
+                  <option value="discount-high">🔥 Discount (High to Low)</option>
                 </select>
                 
                 <select
@@ -180,6 +189,53 @@ const FilterShopBox = ({
                     />
                   </div>
                   <button type="button" className="btn btn-primary">Apply Filter</button>
+                </div>
+              </div>
+            </div>
+            
+            <div className="col-lg-4 col-md-6 mb-3">
+              <div className="filter-box p-4" style={{ background: "#f9f9f9", borderRadius: "5px" }}>
+                <h5 className="mb-3">Discount Status</h5>
+                <div className="discount-filter">
+                  <div className="form-check mb-2">
+                    <input 
+                      className="form-check-input" 
+                      type="radio" 
+                      id="onSale-all"
+                      name="onSale"
+                      checked={onSale === null}
+                      onChange={() => handleOnSaleChange(null)}
+                    />
+                    <label className="form-check-label" htmlFor="onSale-all">
+                      All Products
+                    </label>
+                  </div>
+                  <div className="form-check mb-2">
+                    <input 
+                      className="form-check-input" 
+                      type="radio" 
+                      id="onSale-true"
+                      name="onSale"
+                      checked={onSale === true}
+                      onChange={() => handleOnSaleChange(true)}
+                    />
+                    <label className="form-check-label" htmlFor="onSale-true">
+                      On Sale <span className="badge bg-danger ms-1">Save!</span>
+                    </label>
+                  </div>
+                  <div className="form-check mb-2">
+                    <input 
+                      className="form-check-input" 
+                      type="radio" 
+                      id="onSale-false"
+                      name="onSale"
+                      checked={onSale === false}
+                      onChange={() => handleOnSaleChange(false)}
+                    />
+                    <label className="form-check-label" htmlFor="onSale-false">
+                      Regular Price
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>

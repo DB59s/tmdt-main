@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
+import WishlistButton from '../elements/WishlistButton'
 
 const ProductCard = ({ product, onAddToCart }) => {
   const [loading, setLoading] = useState(false)
@@ -27,6 +28,25 @@ const ProductCard = ({ product, onAddToCart }) => {
             style={{ maxHeight: "250px", width: "100%", objectFit: "contain" }}
           />
         </Link>
+        {product.onSale && (
+          <div 
+            className="sale-badge" 
+            style={{ 
+              position: "absolute", 
+              top: "10px", 
+              left: "10px", 
+              backgroundColor: "#ff4a17", 
+              color: "white", 
+              padding: "3px 8px", 
+              borderRadius: "3px",
+              fontSize: "12px"
+            }}
+          >
+            {product.priceBeforeSale && product.price ? 
+              `-${Math.round((1 - product.price / product.priceBeforeSale) * 100)}%` : 
+              'SALE'}
+          </div>
+        )}
         <div className="product-action">
           <button 
             type="button" 
@@ -40,9 +60,10 @@ const ProductCard = ({ product, onAddToCart }) => {
           <Link href={`/shop-details/${product._id || product.id}`} className="action-btn" title="Quick View">
             <i className="fa fa-eye"></i>
           </Link>
-          <button type="button" className="action-btn" title="Add to Wishlist">
-            <i className="fa fa-heart"></i>
-          </button>
+          <WishlistButton 
+            productId={product._id || product.id} 
+            className="action-btn" 
+          />
         </div>
       </div>
       <div className="product-content">
@@ -50,7 +71,14 @@ const ProductCard = ({ product, onAddToCart }) => {
           <Link href={`/shop-details/${product._id || product.id}`}>{product.name}</Link>
         </h4>
         <div className="product-price">
-          <span>${(product.price || 0).toFixed(2)}</span>
+          {product.onSale ? (
+            <>
+              <del>${(product.priceBeforeSale || 0).toFixed(2)}</del>
+              <span>${(product.price || 0).toFixed(2)}</span>
+            </>
+          ) : (
+            <span>${(product.priceBeforeSale || product.price || 0).toFixed(2)}</span>
+          )}
         </div>
         {product.reviews && product.reviews.length > 0 && (
           <div className="product-rating">

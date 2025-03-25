@@ -40,6 +40,8 @@ export default function HeaderCart({ isCartSidebar, handleCartSidebar }) {
                 productId: item.id,
                 name: item.title,
                 price: item.price?.max || 0,
+                priceBeforeSale: item.priceBeforeSale || item.price?.max || 0,
+                onSale: item.onSale || false,
                 quantity: item.qty || 1,
                 image: item.imgf ? `/assets/img/product/${item.imgf}` : "/assets/img/product/placeholder.jpg"
             }))
@@ -53,7 +55,8 @@ export default function HeaderCart({ isCartSidebar, handleCartSidebar }) {
 
     const calculateTotal = (items) => {
         return items.reduce((total, item) => {
-            return total + (item.price * item.quantity)
+            const priceToUse = item.onSale ? item.price : (item.priceBeforeSale || item.price)
+            return total + (priceToUse * item.quantity)
         }, 0)
     }
 
@@ -133,7 +136,11 @@ export default function HeaderCart({ isCartSidebar, handleCartSidebar }) {
                                                         </span>
                                                         <div className="tpcart__cart-price">
                                                             <span className="quantity">{item.quantity} x </span>
-                                                            <span className="new-price">${item.price.toFixed(2)}</span>
+                                                            {item.onSale ? (
+                                                                <span className="new-price">${item.price.toFixed(2)}</span>
+                                                            ) : (
+                                                                <span className="new-price">${(item.priceBeforeSale || item.price).toFixed(2)}</span>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 </div>

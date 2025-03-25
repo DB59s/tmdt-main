@@ -19,7 +19,20 @@ exports.getCart = async (req, res) => {
     const cart = await Cart.findOrCreateCart(customerId);
     
     // Populate product details
-    await cart.populate('items.productId', 'name price image stock');
+    await cart.populate('items.productId', 'title price priceBeforeSale onSale thumbnail stock');
+    
+    // Update cart items with current product prices
+    for (const item of cart.items) {
+      if (item.productId) {
+        // Cập nhật giá dựa trên trạng thái onSale
+        const priceToUse = item.productId.onSale ? item.productId.price : item.productId.priceBeforeSale;
+        item.price = priceToUse;
+        item.onSale = item.productId.onSale;
+        item.priceBeforeSale = item.productId.priceBeforeSale;
+      }
+    }
+    
+    await cart.save();
     
     res.status(200).json({
       success: true,
@@ -85,6 +98,9 @@ exports.addItem = async (req, res) => {
       });
     }
     
+    // Xác định giá đúng dựa trên trạng thái giảm giá
+    const priceToUse = product.onSale ? product.price : product.priceBeforeSale;
+    
     // Find or create customer's cart
     const cart = await Cart.findOrCreateCart(customerId);
     
@@ -92,7 +108,9 @@ exports.addItem = async (req, res) => {
     const cartItem = {
       productId: product._id,
       quantity,
-      price: product.price,
+      price: priceToUse,
+      priceBeforeSale: product.priceBeforeSale,
+      onSale: product.onSale,
       name: product.title,
       image: product.thumbnail
     };
@@ -101,7 +119,7 @@ exports.addItem = async (req, res) => {
     await cart.addItem(cartItem);
     
     // Populate product details
-    await cart.populate('items.productId', 'name price image stock');
+    await cart.populate('items.productId', 'title price priceBeforeSale onSale thumbnail stock');
     
     res.status(200).json({
       success: true,
@@ -166,35 +184,56 @@ exports.updateItemQuantity = async (req, res) => {
           message: 'Not enough stock available'
         });
       }
+      
+      // Cập nhật giá và trạng thái giảm giá trong giỏ hàng
+      const priceToUse = product.onSale ? product.price : product.priceBeforeSale;
+      
+      // Find customer's cart
+      const cart = await Cart.findOne({ 
+        customerId, 
+        status: 'active'
+      });
+      
+      if (!cart) {
+        return res.status(404).json({
+          success: false,
+          message: 'Cart not found'
+        });
+      }
+      
+      // Update quantity and price info
+      await cart.updateItemQuantity(productId, quantity, priceToUse, product.priceBeforeSale, product.onSale);
+    } else {
+      // Find customer's cart
+      const cart = await Cart.findOne({ 
+        customerId, 
+        status: 'active'
+      });
+      
+      if (!cart) {
+        return res.status(404).json({
+          success: false,
+          message: 'Cart not found'
+        });
+      }
+      
+      // Remove item
+      await cart.removeItem(productId);
     }
     
-    // Find customer's cart
-    const cart = await Cart.findOne({ 
+    // Get updated cart
+    const updatedCart = await Cart.findOne({ 
       customerId, 
       status: 'active'
     });
     
-    if (!cart) {
-      return res.status(404).json({
-        success: false,
-        message: 'Cart not found'
-      });
-    }
-    
-    // Update quantity or remove item
-    if (quantity <= 0) {
-      await cart.removeItem(productId);
-    } else {
-      await cart.updateItemQuantity(productId, quantity);
-    }
-    
     // Populate product details
-    await cart.populate('items.productId', 'name price image stock');
+    await updatedCart.populate('items.productId', 'title price priceBeforeSale onSale thumbnail stock');
     
     res.status(200).json({
       success: true,
       message: quantity <= 0 ? 'Item removed from cart' : 'Item quantity updated',
-      data: cart
+      data: updatedCart
     });
   } catch (error) {
     console.error('Error updating cart item:', error);
@@ -245,7 +284,7 @@ exports.removeItem = async (req, res) => {
     await cart.removeItem(productId);
     
     // Populate product details
-    await cart.populate('items.productId', 'name price image stock');
+    await cart.populate('items.productId', 'title price priceBeforeSale onSale thumbnail stock');
     
     res.status(200).json({
       success: true,

@@ -121,7 +121,7 @@ export default function Header5({ scroll, isMobileMenu, handleMobileMenu, isCart
                                             <i className="fal fa-shopping-cart" />
                                             <CartShow />
                                         </button>
-                                        <Link href="/sign-in"><i className="fal fa-user" /></Link>
+                                        {/* <Link href="/sign-in"><i className="fal fa-user" /></Link> */}
                                         <Link href="/wishlist" className="header-cart p-relative tp-cart-toggle">
                                             <i className="fal fa-heart" />
                                             <WishListShow />

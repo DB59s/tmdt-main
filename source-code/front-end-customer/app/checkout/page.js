@@ -271,7 +271,8 @@ export default function Checkout() {
         }
         
         return cart.items.reduce((total, item) => {
-            return total + (item.price * item.quantity);
+            const priceToUse = item.onSale ? item.price : (item.priceBeforeSale || item.price)
+            return total + (priceToUse * item.quantity);
         }, 0);
     }
     
@@ -565,7 +566,9 @@ export default function Checkout() {
                                                                             {item.name} <strong className="product-quantity"> × {item.quantity}</strong>
                                                                         </td>
                                                                         <td className="product-total">
-                                                                            <span className="amount">${(item.price * item.quantity).toFixed(2)}</span>
+                                                                            <span className="amount">
+                                                                                ${((item.onSale ? item.price : (item.priceBeforeSale || item.price)) * item.quantity).toFixed(2)}
+                                                                            </span>
                                                                         </td>
                                                                     </tr>
                                                                 ))}

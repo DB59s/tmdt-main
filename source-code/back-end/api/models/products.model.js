@@ -4,6 +4,7 @@ const productSchema = new mongoose.Schema({
     title: { type: String, required: true },
     description: { type: String, required: true },
     categoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
+    priceBeforeSale: { type: Number, required: true },
     price: { type: Number, required: true },
     discountPercentage: { type: Number, required: true },
     rating: { type: Number, required: true },
@@ -23,6 +24,7 @@ const productSchema = new mongoose.Schema({
     returnPolicy: { type: String, required: true },
     images: { type: [String], required: true },
     thumbnail: { type: String, required: true },
+    onSale: { type: Boolean, required: true },
     reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }]
 }, { timestamps: true });
 

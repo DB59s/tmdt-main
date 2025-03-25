@@ -16,8 +16,9 @@ const ShopPage = () => {
   const [sortOption, setSortOption] = useState('newest')
   const [perPage, setPerPage] = useState(12)
   const [viewMode, setViewMode] = useState('grid')
+  const [onSaleFilter, setOnSaleFilter] = useState(null) // null = no filter, true = on sale, false = not on sale
   
-  // Get category from URL if present
+  // Get parameters from URL if present
   useEffect(() => {
     const categoryParam = searchParams.get('category')
     if (categoryParam) {
@@ -29,6 +30,11 @@ const ShopPage = () => {
       setSearchTerm(searchParam)
     }
     
+    const onSaleParam = searchParams.get('onSale')
+    if (onSaleParam !== null) {
+      setOnSaleFilter(onSaleParam === 'true')
+    }
+    
     // Fetch categories
     fetchCategories()
   }, [searchParams])
@@ -36,7 +42,7 @@ const ShopPage = () => {
   const fetchCategories = async () => {
     setLoading(true)
     try {
-      const response = await fetch('http://localhost:8080/api/customer/categories')
+      const response = await fetch(`${process.env.domainApi}/api/customer/categories`)
       const data = await response.json()
       
       if (data) {
@@ -66,7 +72,7 @@ const ShopPage = () => {
     })
   }
   
-  // Xử lý thay đổi từ FilterShopBox
+  // Handle different filter changes
   const handleSortChange = (value) => {
     setSortOption(value)
   }
@@ -79,6 +85,21 @@ const ShopPage = () => {
     setViewMode(mode)
   }
   
+  const handleOnSaleChange = (value) => {
+    setOnSaleFilter(value)
+    
+    // Update URL with onSale parameter
+    const url = new URL(window.location.href)
+    if (value === null) {
+      url.searchParams.delete('onSale')
+    } else {
+      url.searchParams.set('onSale', value.toString())
+    }
+    window.history.pushState({}, '', url)
+  }
+  
+  console.log(onSaleFilter)
+
   return (
     <Layout headerStyle={3} footerStyle={1} breadcrumbTitle="Shop">
       <div className="product-filter-area pt-65 pb-40">
@@ -98,6 +119,8 @@ const ShopPage = () => {
             categories={categories}
             loading={loading}
             handleCategorySelect={handleCategorySelect}
+            handleOnSaleChange={handleOnSaleChange}
+            onSale={onSaleFilter}
           />
         </div>
       </div>
@@ -117,6 +140,7 @@ const ShopPage = () => {
                 sortOption={sortOption}
                 viewMode={viewMode}
                 priceRange={priceRange}
+                onSale={onSaleFilter}
               />
             </div>
           </div>

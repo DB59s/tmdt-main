@@ -88,7 +88,7 @@ export default function Slider1() {
                             <div className="row">
                                 <div className="col-lg-12 col-md-6">
                                     <div className="tpslider-banner tp-slider-sm-banner mb-30">
-                                        <Link href="/shop-details">
+                                        <Link href="/shop">
                                             <div className="tpslider-banner__img">
                                                 <img src="/assets/img/slider/banner-slider-01.jpg" alt="" />
                                                 <div className="tpslider-banner__content">
@@ -101,7 +101,7 @@ export default function Slider1() {
                                 </div>
                                 <div className="col-lg-12 col-md-6">
                                     <div className="tpslider-banner">
-                                        <Link href="/shop-details">
+                                        <Link href="/shop">
                                             <div className="tpslider-banner__img">
                                                 <img src="/assets/img/slider/banner-slider-02.jpg" alt="" />
                                                 <div className="tpslider-banner__content">

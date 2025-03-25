@@ -15,6 +15,13 @@ const CartItemSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  priceBeforeSale: {
+    type: Number
+  },
+  onSale: {
+    type: Boolean,
+    default: false
+  },
   name: String,
   image: String,
   addedAt: {
@@ -83,6 +90,10 @@ CartSchema.methods.addItem = function(item) {
   if (existingItemIndex > -1) {
     // Update quantity if product already in cart
     this.items[existingItemIndex].quantity += item.quantity;
+    // Cập nhật thông tin giá dựa trên item mới
+    this.items[existingItemIndex].price = item.price;
+    this.items[existingItemIndex].priceBeforeSale = item.priceBeforeSale;
+    this.items[existingItemIndex].onSale = item.onSale;
   } else {
     // Add new item to cart
     this.items.push(item);
@@ -91,7 +102,7 @@ CartSchema.methods.addItem = function(item) {
   return this.save();
 };
 
-CartSchema.methods.updateItemQuantity = function(productId, quantity) {
+CartSchema.methods.updateItemQuantity = function(productId, quantity, price, priceBeforeSale, onSale) {
   const item = this.items.find(
     item => item.productId.toString() === productId.toString()
   );
@@ -106,6 +117,20 @@ CartSchema.methods.updateItemQuantity = function(productId, quantity) {
   }
   
   item.quantity = quantity;
+  
+  // Cập nhật thông tin về giá
+  if (price !== undefined) {
+    item.price = price;
+  }
+  
+  if (priceBeforeSale !== undefined) {
+    item.priceBeforeSale = priceBeforeSale;
+  }
+  
+  if (onSale !== undefined) {
+    item.onSale = onSale;
+  }
+  
   return this.save();
 };
 

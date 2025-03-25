@@ -9,7 +9,8 @@ const ProductList = ({
   searchTerm = '', 
   sortOption = 'name-asc',
   viewMode = 'grid',
-  priceRange = { min: 0, max: 1000 }
+  priceRange = { min: 0, max: 1000 },
+  onSale = null
 }) => {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
@@ -33,7 +34,7 @@ const ProductList = ({
   
   useEffect(() => {
     fetchProducts()
-  }, [category, searchTerm, sortOption, limit, page, priceRange])
+  }, [category, searchTerm, sortOption, limit, page, priceRange, onSale])
   
   const fetchProducts = async () => {
     setLoading(true)
@@ -72,8 +73,13 @@ const ProductList = ({
         params.append('maxPrice', priceRange.max)
       }
       
+      // Thêm tham số lọc onSale
+      if (onSale !== null) {
+        params.append('onSale', onSale)
+      }
+      
       // Tạo URL với query parameters
-      const url = `http://localhost:8080/api/customer/products?${params.toString()}`
+      const url = `${process.env.domainApi}/api/customer/products?${params.toString()}`
       
       const response = await fetch(url)
       if (!response.ok) {
@@ -103,10 +109,14 @@ const ProductList = ({
   
   const handleAddToCart = async (productId) => {
     try {
+      // Find the product to get its details
+      const product = products.find(p => p._id === productId || p.id === productId)
+      if (!product) return
+      
       const customerId = localStorage.getItem('customerId')
       const token = localStorage.getItem('token')
       
-      let url = `http://localhost:8080/api/customer/cart/items`
+      let url = `${process.env.domainApi}/api/customer/cart/items`
       if (customerId) url += `/${customerId}`
       
       const headers = {
@@ -122,7 +132,10 @@ const ProductList = ({
         headers,
         body: JSON.stringify({
           productId,
-          quantity: 1
+          quantity: 1,
+          productPrice: product.price,
+          onSale: product.onSale,
+          priceBeforeSale: product.priceBeforeSale
         })
       })
       
@@ -254,7 +267,14 @@ const ProductList = ({
                         <Link href={`/shop-details/${product._id || product.id}`}>{product.name}</Link>
                       </h4>
                       <div className="product-price mb-10">
-                        <span>${(product.price || 0).toFixed(2)}</span>
+                        {product.onSale ? (
+                          <>
+                            <del>${(product.priceBeforeSale || 0).toFixed(2)}</del>
+                            <span>${(product.price || 0).toFixed(2)}</span>
+                          </>
+                        ) : (
+                          <span>${(product.priceBeforeSale || product.price || 0).toFixed(2)}</span>
+                        )}
                       </div>
                       {product.reviews && product.reviews.length > 0 && (
                         <div className="product-rating mb-10">

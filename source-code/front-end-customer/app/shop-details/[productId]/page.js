@@ -6,6 +6,7 @@ import Layout from '@/components/layout/Layout'
 import { toast } from 'react-toastify'
 import { Autoplay, Navigation, Pagination } from "swiper/modules"
 import { Swiper, SwiperSlide } from "swiper/react"
+import WishlistButton from '@/components/elements/WishlistButton'
 
 const swiperOptions = {
     modules: [Autoplay, Pagination, Navigation],
@@ -180,7 +181,10 @@ const ProductDetailsPage = () => {
         headers,
         body: JSON.stringify({
           productId,
-          quantity
+          quantity,
+          productPrice: product.price,
+          onSale: product.onSale,
+          priceBeforeSale: product.priceBeforeSale
         })
       })
       
@@ -406,8 +410,14 @@ const ProductDetailsPage = () => {
                       </span>
                     </div>
                     <div className="tpproduct-details__price mb-30">
-                      {product.oldPrice && <del>${product.oldPrice.toFixed(2)}</del>}
-                      <span>${(product.price || 0).toFixed(2)}</span>
+                      {product.onSale ? (
+                        <>
+                          <del>${(product.priceBeforeSale || 0).toFixed(2)}</del>
+                          <span>${(product.price || 0).toFixed(2)}</span>
+                        </>
+                      ) : (
+                        <span>${(product.priceBeforeSale || product.price || 0).toFixed(2)}</span>
+                      )}
                     </div>
                     <div className="tpproduct-details__pera">
                       <p>{product.description}</p>
@@ -431,9 +441,10 @@ const ProductDetailsPage = () => {
                         </button>
                       </div>
                       <div className="tpproduct-details__wishlist ml-20">
-                        <Link href="#">
-                          <i className="fal fa-heart" />
-                        </Link>
+                        <WishlistButton 
+                          productId={productId} 
+                          iconClass="fa-heart" 
+                        />
                       </div>
                     </div>
                     
