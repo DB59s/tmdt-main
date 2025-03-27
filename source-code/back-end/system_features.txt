@@ -1,0 +1,142 @@
+# TÍNH NĂNG HỆ THỐNG THƯƠNG MẠI ĐIỆN TỬ
+
+## TÍNH NĂNG DÀNH CHO KHÁCH HÀNG (CUSTOMER)
+
+### 1. Quản lý tài khoản
+- Đăng ký, đăng nhập tài khoản
+- Quản lý thông tin cá nhân
+- Đổi mật khẩu
+- Quản lý địa chỉ giao hàng
+
+### 2. Duyệt sản phẩm
+- Xem danh sách sản phẩm với bộ lọc (danh mục, giá, trạng thái giảm giá, đánh giá)
+- Tìm kiếm sản phẩm theo tên, mô tả
+- Xem sản phẩm đang giảm giá (On Sale)
+- Xem sản phẩm theo danh mục phổ biến
+- Xem chi tiết sản phẩm (thông tin, giá cả, đánh giá)
+- Xem sản phẩm theo các trạng thái: tất cả, phổ biến, giảm giá, đánh giá cao nhất
+
+### 3. Giỏ hàng
+- Thêm sản phẩm vào giỏ hàng
+- Xem giỏ hàng hiện tại
+- Cập nhật số lượng sản phẩm trong giỏ hàng
+- Xóa sản phẩm khỏi giỏ hàng
+- Lưu giỏ hàng theo phiên đăng nhập
+
+### 4. Wishlist (Danh sách yêu thích)
+- Thêm sản phẩm vào danh sách yêu thích
+- Xem danh sách yêu thích
+- Xóa sản phẩm khỏi danh sách yêu thích
+- Kiểm tra sản phẩm có trong danh sách yêu thích chưa
+
+### 5. Đặt hàng
+- Tạo đơn hàng mới
+- Áp dụng mã giảm giá
+- Chọn phương thức thanh toán
+- Chọn địa chỉ giao hàng
+- Theo dõi trạng thái đơn hàng
+- Xem lịch sử đơn hàng
+
+### 6. Thanh toán
+- Thanh toán khi nhận hàng (COD)
+- Thanh toán qua ngân hàng
+- Xem trạng thái thanh toán
+
+### 7. Đổi trả hàng và hoàn tiền
+- Yêu cầu đổi hàng (chỉ với đơn hàng đã giao và đã thanh toán)
+- Yêu cầu trả hàng và hoàn tiền
+- Gửi hình ảnh minh họa lý do đổi trả
+- Theo dõi trạng thái yêu cầu đổi/trả hàng
+- Cung cấp thông tin ngân hàng để hoàn tiền (với yêu cầu hoàn tiền)
+- Cập nhật hoặc hủy yêu cầu đổi/trả (khi còn ở trạng thái chờ xử lý)
+
+### 8. Đánh giá sản phẩm
+- Viết đánh giá cho sản phẩm đã mua
+- Chấm điểm sản phẩm
+- Xem đánh giá từ khách hàng khác
+
+### 9. Mã giảm giá
+- Áp dụng mã giảm giá khi mua hàng
+- Xem danh sách mã giảm giá hiện có
+
+## TÍNH NĂNG DÀNH CHO QUẢN TRỊ VIÊN (ADMIN)
+
+### 1. Dashboard
+- Xem tổng quan doanh số, đơn hàng
+- Thống kê người dùng, sản phẩm
+- Biểu đồ phân tích bán hàng
+- Xem sản phẩm bán chạy
+
+### 2. Quản lý sản phẩm
+- Thêm, sửa, xóa sản phẩm
+- Quản lý thông tin sản phẩm (giá, mô tả, hình ảnh)
+- Quản lý kho hàng (số lượng tồn)
+- Đặt sản phẩm giảm giá và tính giá trước khi giảm (priceBeforeSale)
+- Đánh dấu sản phẩm đang giảm giá (onSale)
+- Thiết lập giảm giá cho tất cả sản phẩm trong một danh mục
+
+### 3. Quản lý danh mục
+- Thêm, sửa, xóa danh mục sản phẩm
+- Phân loại sản phẩm theo danh mục
+
+### 4. Quản lý đơn hàng
+- Xem danh sách đơn hàng
+- Cập nhật trạng thái đơn hàng (xác nhận, đóng gói, vận chuyển, đã giao)
+- Xem chi tiết đơn hàng
+- Tìm kiếm đơn hàng
+- Lọc đơn hàng theo trạng thái, ngày tháng
+
+### 5. Quản lý người dùng
+- Xem danh sách người dùng
+- Quản lý quyền hạn
+- Khóa/mở tài khoản người dùng
+
+### 6. Quản lý mã giảm giá
+- Tạo, sửa, xóa mã giảm giá
+- Thiết lập điều kiện áp dụng
+- Quản lý thời gian hiệu lực
+- Giới hạn số lượng sử dụng
+
+### 7. Quản lý yêu cầu đổi/trả hàng
+- Xem danh sách yêu cầu đổi/trả hàng
+- Xem chi tiết yêu cầu (bao gồm hình ảnh minh họa)
+- Cập nhật trạng thái yêu cầu (đang xử lý, chấp nhận, hoàn thành, từ chối)
+- Thêm sản phẩm thay thế cho yêu cầu đổi hàng
+- Lọc và tìm kiếm các yêu cầu
+
+### 8. Quản lý đánh giá
+- Xem tất cả đánh giá sản phẩm
+- Kiểm duyệt hoặc xóa đánh giá không phù hợp
+
+### 9. Quản lý tệp và hình ảnh
+- Tải lên hình ảnh sản phẩm
+- Tải lên hình ảnh cho yêu cầu đổi/trả hàng
+- Quản lý thư mục lưu trữ
+
+### 10. Báo cáo và thống kê
+- Báo cáo doanh thu theo thời gian
+- Thống kê sản phẩm bán chạy
+- Phân tích hành vi người dùng
+- Thống kê tỷ lệ đơn hàng bị đổi/trả
+
+## TÍNH NĂNG CHUNG
+
+### 1. Bảo mật
+- Xác thực người dùng
+- Phân quyền (Admin, Customer)
+- Bảo vệ thông tin cá nhân
+
+### 2. Giao diện
+- Giao diện đáp ứng trên nhiều thiết bị
+- Tương thích với nhiều trình duyệt
+- Theme sáng/tối
+
+### 3. Thông báo
+- Email xác nhận đơn hàng
+- Thông báo trạng thái đơn hàng
+- Thông báo thay đổi trạng thái đổi/trả hàng
+
+### 4. Công cụ tìm kiếm
+- Tìm kiếm cơ bản và nâng cao
+- Bộ lọc đa tiêu chí
+- Sắp xếp kết quả theo nhiều tiêu chí 
