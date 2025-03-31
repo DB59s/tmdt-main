@@ -1,7 +1,7 @@
 const Order = require('../../models/order.model');
 const OrderItem = require('../../models/orderItem.model');
 const OrderTracking = require('../../models/orderTracking.model');
-const { sendOrderStatusEmail } = require('../../../config/mailer');
+const { sendOrderStatusEmail  , sendEmailPaymentSuccess} = require('../../../config/mailer');
 
 // Lấy tất cả đơn hàng (có phân trang và lọc)
 module.exports.getAllOrders = async (req, res) => {
@@ -236,19 +236,12 @@ module.exports.updatePaymentStatus = async (req, res) => {
         });
         await orderTracking.save();
         
-        // Gửi email thông báo cho khách hàng nếu thanh toán hoàn tất
-        if (paymentStatus === 'Đã thanh toán') {
-            try {
-                await sendOrderStatusEmail(
-                    order.customerEmail, 
-                    order.orderId, 
-                    'payment_confirmed', 
-                    { paymentMethod: order.paymentMethod }
-                );
-            } catch (emailError) {
-                console.error('Error sending payment confirmation email:', emailError);
-                // Tiếp tục xử lý mà không dừng luồng nếu email gặp sự cố
-            }
+        // Gửi email thông báo cho khách hàng
+        try {
+            await sendEmailPaymentSuccess(order.customerEmail, order.orderId, 'Đã thanh toán');
+        } catch (emailError) {
+            console.error('Error sending payment success email:', emailError);
+            // Tiếp tục xử lý mà không dừng luồng nếu email gặp sự cố
         }
         
         res.json({

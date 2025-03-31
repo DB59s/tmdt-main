@@ -10,6 +10,7 @@ const ComponentsAuthLoginForm = () => {
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const submitForm = async (e) => {
+        console.log(process.env.domainApi);
         e.preventDefault();
         setErrorMessage(''); 
         try {

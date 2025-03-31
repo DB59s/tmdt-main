@@ -19,8 +19,8 @@ const sendEmailSuccess = (to, orderId, status) => {
     const mailOptions = {
         from: process.env.EMAIL_USER,
         to: to,
-        subject: `Đơn hàng #${orderId} đã được đặt thành công`,
-        text: `Đơn hàng của bạn với mã #${orderId} đã được đặt thành công.
+        subject: `Đơn hàng #${orderId} đang được xác nhận`,
+        text: `Đơn hàng của bạn với mã #${orderId} đang được xác nhận.
         Trạng thái đơn hàng sẽ được chúng tôi cập nhật bằng cách liên hệ với bạn thông qua gmail của bạn.
         Cảm ơn bạn đã đặt hàng.
             `
@@ -41,4 +41,17 @@ const sendOrderStatusEmail = (to, orderId, status) => {
     return transporter.sendMail(mailOptions);
 };
 
-module.exports = { sendOrderStatusEmail, sendEmailSuccess, transporter }; 
+const sendEmailPaymentSuccess = (to, orderId, status) => {
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: to,
+        subject: `Đơn hàng #${orderId} đã được thanh toán thành công`,
+        text: `Đơn hàng của bạn với mã #${orderId} đã được thanh toán thành công.
+        Cảm ơn bạn đã đặt hàng.
+        `
+    };
+
+    return transporter.sendMail(mailOptions);
+};
+
+module.exports = { sendOrderStatusEmail, sendEmailSuccess, sendEmailPaymentSuccess, transporter }; 

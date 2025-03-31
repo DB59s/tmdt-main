@@ -150,7 +150,7 @@ module.exports.createOrder = async (req, res) => {
 
         // Send confirmation email to customer
         try {
-            await sendEmailSuccess(req.body.customerEmail, order.orderId, order.status);
+            await sendEmailSuccess(req.body.customerEmail, order._id, order.status);
         } catch (emailError) {
             console.error('Error sending order confirmation email:', emailError);
             // Continue with order creation even if email fails
