@@ -30,8 +30,8 @@ const CartItems = () => {
                     </td>
 
                     <td className="product-name">
-                        <Link href={`/shop/${item.id}`}>
-                            {item.title}
+                        <Link href={`/shop-details/${item.product._id || item.product.id}`}>
+                            {item.product.title || item.product.name}
                         </Link>
                     </td>
 

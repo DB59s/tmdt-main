@@ -188,7 +188,7 @@ const WishlistItems = () => {
           </td>
           <td className="product-name">
             <Link href={`/shop-details/${item.productId._id}`}>
-              {item.name || item.productId.title}
+              {item.productId.title || item.productId.name}
             </Link>
           </td>
           <td className="product-price">

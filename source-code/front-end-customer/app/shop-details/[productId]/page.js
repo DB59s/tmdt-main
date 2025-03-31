@@ -348,7 +348,7 @@ const ProductDetailsPage = () => {
 
   return (
     <>
-      <Layout headerStyle={3} footerStyle={1} breadcrumbTitle={product.name || "Product Details"}>
+      <Layout headerStyle={3} footerStyle={1} breadcrumbTitle={product.title || product.name || "Product Details"}>
         <div>
           <section className="product-area pt-80 pb-25">
             <div className="container">
@@ -363,7 +363,7 @@ const ProductDetailsPage = () => {
                             className={activeIndex2 === index ? "nav-link active" : "nav-link"} 
                             onClick={() => handleImageClick(index)}
                           >
-                            <img src={image || "/assets/img/product/placeholder.jpg"} alt={`${product.name} thumbnail ${index + 1}`} />
+                            <img src={image || "/assets/img/product/placeholder.jpg"} alt={`${product.title || product.name} thumbnail ${index + 1}`} />
                           </button>
                         ))}
                         {(!product.images || product.images.length === 0) && (
@@ -378,7 +378,7 @@ const ProductDetailsPage = () => {
                             key={index}
                             className={activeIndex2 === index ? "tab-pane fade show active" : "tab-pane fade"}
                           >
-                            <img src={image || "/assets/img/product/placeholder.jpg"} alt={`${product.name} image ${index + 1}`} />
+                            <img src={image || "/assets/img/product/placeholder.jpg"} alt={`${product.title || product.name} image ${index + 1}`} />
                           </div>
                         ))}
                         {(!product.images || product.images.length === 0) && (
@@ -404,7 +404,7 @@ const ProductDetailsPage = () => {
                       <a className="tpproduct-details__reviewers">{reviewCount} Reviews</a>
                     </div>
                     <div className="tpproduct-details__title-area d-flex align-items-center flex-wrap mb-5">
-                      <h3 className="tpproduct-details__title">{product.name}</h3>
+                      <h3 className="tpproduct-details__title">{product.title || product.name}</h3>
                       <span className="tpproduct-details__stock">
                         {product.stock > 0 ? "In Stock" : "Out of Stock"}
                       </span>
@@ -578,7 +578,7 @@ const ProductDetailsPage = () => {
                       <div className={activeTab === 'reviews' ? "tab-pane fade show active" : "tab-pane fade"}>
                         <div className="product-details-review">
                           <h3 className="tp-comments-title mb-35">
-                            {reviewCount} reviews for "{product.name}"
+                            {reviewCount} reviews for "{product.title || product.name}"
                           </h3>
                           <div className="latest-comments mb-55">
                             <ul>
