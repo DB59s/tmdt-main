@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const path = require('path');
+const multer = require('multer');
 
 const productRouter = require('./customer/Product/product.router');
 const ordersRouter = require('./customer/Order/orders.router');
@@ -15,6 +16,10 @@ const discountAdminRouter = require('./admin/Discount/discount');
 const refundRequestAdminRouter = require('./admin/RefundRequest/index');
 const returnRequestAdminRouter = require('./admin/ReturnRequest/returnRequest.admin.router');
 const uploadRouter = require('./upload.router');
+const statisticsAdminRouter = require('./admin/Statistic/statistics.admin.router');
+const reviewAdminRouter = require('./admin/Review/review.admin.router');
+const settingsAdminRouter = require('./admin/Setting/settings.admin.router');
+const categoryAdminRouter = require('./admin/Category/category.admin.router');
 
 // New customer routes for device identification, profile, and cart
 const deviceRouter = require('./customer/Device');
@@ -34,6 +39,10 @@ module.exports = (app) => {
     app.use('/api/admin/discounts', discountAdminRouter);
     app.use('/api/admin/refund-requests', refundRequestAdminRouter);
     app.use('/api/admin/return-requests', returnRequestAdminRouter);
+    app.use('/api/admin/statistics', statisticsAdminRouter);
+    app.use('/api/admin/reviews', reviewAdminRouter);
+    app.use('/api/admin/settings', settingsAdminRouter);
+    app.use('/api/admin/categories', categoryAdminRouter);
     
     // API upload file
     app.use('/api/upload', uploadRouter);

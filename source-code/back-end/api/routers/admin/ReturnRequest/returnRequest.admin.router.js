@@ -7,6 +7,9 @@ const ReturnRequestAdminController = require('../../../controllers/admin/returnR
 // Lấy danh sách tất cả yêu cầu đổi/trả hàng
 router.get('/', authMiddleware(), roleMiddleware(['1']), ReturnRequestAdminController.getAllReturnRequests);
 
+// Lấy thống kê yêu cầu đổi/trả hàng
+router.get('/statistics', authMiddleware(), roleMiddleware(['1']), ReturnRequestAdminController.getReturnStatistics);
+
 // Lấy chi tiết yêu cầu đổi/trả hàng
 router.get('/:id', authMiddleware(), roleMiddleware(['1']), ReturnRequestAdminController.getReturnRequestDetails);
 

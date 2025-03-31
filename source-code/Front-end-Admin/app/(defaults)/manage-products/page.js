@@ -1,16 +1,16 @@
-import ComponentsDatatablesCheckbox from '@/components/manage-products/components-datatables-checkbox';
-import IconBell from '@/components/icon/icon-bell';
+import ProductsList from '@/components/manage-products/products-list';
 import React from 'react';
 
 export const metadata = {
-    title: 'Products',
+    title: 'Products Management',
 };
-const Products = () => {
+
+const ProductsPage = () => {
     return (
         <div>
-            <ComponentsDatatablesCheckbox />
+            <ProductsList />
         </div>
     );
 };
 
-export default Products;
+export default ProductsPage;

@@ -22,7 +22,7 @@ export default function BackToTop() {
     return (
         <>
             {hasScrolled && (
-                <Link className="scroll-top scroll-to-target open" href="#top" style={{ position: 'fixed', zIndex: 2147483647 }}>
+                <Link className="scroll-top scroll-to-target open" href="#top" style={{ position: 'fixed', zIndex: 999 }}>
                     <i className="fas fa-angle-up"></i>
                 </Link>
             )}

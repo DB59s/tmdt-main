@@ -14,17 +14,27 @@ import "/public/assets/css/magnific-popup.css"
 import "/public/assets/css/meanmenu.css"
 import "/public/assets/css/spacing.css"
 import "/public/assets/css/main.css"
+import dynamic from 'next/dynamic'
+
+// Dynamically import the ChatBubble component with SSR disabled
+const ChatBubble = dynamic(() => import('@/components/chat/ChatBubble'), { 
+  ssr: false 
+})
+
 const jost = Jost({
     weight: ['300', '400', '500', '600', '700'],
     subsets: ['latin'],
     variable: "--tp-ff-body",
 })
+
+
 export default function RootLayout({ children }) {
     return (
         <html lang="en">
             <body className={`${jost.variable}`}>
                 <Provider store={store}>
                     {children}
+                    <ChatBubble />
                     <ToastContainer
                         position="bottom-right"
                         autoClose={500}

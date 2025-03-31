@@ -6,11 +6,11 @@ import axios from 'axios'; // Import axios để gọi API
 import IconTrashLines from '@/components/icon/icon-trash-lines';
 import IconPencilPaper from '@/components/icon/icon-pencil-paper';
 import IconEye from '@/components/icon/icon-eye';
-import IconCpuBolt from '@/components/icon/icon-cpu-bolt';
-import IconLogout from '@/components/icon/icon-logout';
+import IconCalculator from '@/components/icon/icon-calculator';
 import { useRouter } from 'next/navigation';
 
 const ComponentsDatatablesCheckbox = () => {
+    const apiUrl = process.env.domainApi;
     const router = useRouter();
     const [page, setPage] = useState(1);
     const PAGE_SIZES = [10, 20, 30, 50, 100];
@@ -27,17 +27,29 @@ const ComponentsDatatablesCheckbox = () => {
     const [categories, setCategories] = useState([]); // Thêm state để lưu danh sách category
     const [selectedCategory, setSelectedCategory] = useState(''); // Thêm state để lưu category đã chọn
     const [sortOrder, setSortOrder] = useState('newest'); // Thêm state để lưu trữ cách sắp xếp
+    const [minPrice, setMinPrice] = useState('');
+    const [maxPrice, setMaxPrice] = useState('');
+    const [onSaleFilter, setOnSaleFilter] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [showFilters, setShowFilters] = useState(false);
 
     // Đưa hàm fetchProducts ra ngoài useEffect và sử dụng useCallback để tối ưu
     const fetchProducts = useCallback(async () => {
+        setIsLoading(true);
         try {
-            const response = await axios.get('https://vuquangduy.io.vn/api/products', {
+            const response = await axios.get(`${apiUrl}/api/admin/products`, {
                 params: {
-                    title: search,
                     page: page,
                     limit: pageSize,
-                    categoryId: selectedCategory,
-                    sortOrder: sortOrder // Sử dụng sortOrder từ state
+                    search: search || undefined,
+                    category: selectedCategory || undefined,
+                    minPrice: minPrice || undefined,
+                    maxPrice: maxPrice || undefined,
+                    onSale: onSaleFilter || undefined,
+                    sort: sortOrder || undefined
+                },
+                headers: {
+                    authorization: `${sessionStorage.getItem('token')}`
                 }
             });
             setInitialRecords(response.data.products);
@@ -45,14 +57,16 @@ const ComponentsDatatablesCheckbox = () => {
             setTotalRecords(response.data.totalProducts);
         } catch (error) {
             console.error('Error fetching products:', error);
+        } finally { 
+            setIsLoading(false);
         }
-    }, [search, page, pageSize, selectedCategory, sortOrder]);
+    }, [search, page, pageSize, selectedCategory, sortOrder, minPrice, maxPrice, onSaleFilter]);
 
     useEffect(() => {
         // Gọi API để lấy tất cả category
-        const fetchCategories = async () => {
+        const fetchCategories = async () => {   
             try {
-                const response = await axios.get('https://vuquangduy.io.vn/api/categories'); // Đảm bảo URL đúng
+                const response = await axios.get(`${apiUrl}/api/categories`); // Đảm bảo URL đúng
                 setCategories(response.data); // Cập nhật danh sách category
                 
             } catch (error) {
@@ -69,12 +83,7 @@ const ComponentsDatatablesCheckbox = () => {
 
     useEffect(() => {
         setPage(1);
-    }, [pageSize]);
-
-    // Thêm useEffect để reset page về 1 khi thay đổi category hoặc search
-    useEffect(() => {
-        setPage(1);
-    }, [selectedCategory, search, sortOrder]);
+    }, [pageSize, selectedCategory, search, sortOrder, minPrice, maxPrice, onSaleFilter]);
 
     useEffect(() => {
         const data = sortBy(initialRecords, sortStatus.columnAccessor);
@@ -89,21 +98,21 @@ const ComponentsDatatablesCheckbox = () => {
     };
 
     const handleDelete = async (id) => {
-        if (!confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
-            return; // Nếu người dùng không xác nhận, thoát hàm
+        if (!confirm('Are you sure you want to delete this product?')) {
+            return;
         }
 
         try {
-            await axios.delete(`https://vuquangduy.io.vn/api/admin/products/${id}`, {
+            await axios.delete(`${apiUrl}/api/admin/products/${id}`, {
                 headers: {
                     authorization: `${sessionStorage.getItem('token')}`
                 }
             });
-            alert('Xóa sản phẩm thành công!');
+            alert('Product deleted successfully!');
             await fetchProducts(); // Fetch lại danh sách sản phẩm
         } catch (error) {
             console.error('Error deleting product:', error);
-            alert('Đã xảy ra lỗi khi xóa sản phẩm!');
+            alert('Error deleting product: ' + (error.response?.data?.message || error.message));
         }
     };
 
@@ -119,42 +128,180 @@ const ComponentsDatatablesCheckbox = () => {
         // Không cần setPage(1) ở đây vì đã có useEffect riêng
     };
 
+    const handleSortOrderChange = (e) => {
+        setSortOrder(e.target.value);
+    };
+
+    const handleCalculateAllPrices = async () => {
+        if (!confirm('This will recalculate original prices for all products based on discount percentage. Continue?')) {
+            return;
+        }
+        
+        try {
+            const response = await axios.post(`${apiUrl}/api/admin/products/calculate-all-prices`, {}, {
+                headers: {
+                    authorization: `${sessionStorage.getItem('token')}`
+                }
+            });
+            
+            alert(`Success: ${response.data.message}`);
+            fetchProducts();
+        } catch (error) {
+            console.error('Error calculating prices:', error);
+            alert('Error: ' + (error.response?.data?.message || error.message));
+        }
+    };
+
+    const handleSetSaleByCategory = async () => {
+        if (!selectedCategory) {
+            alert('Please select a category first');
+            return;
+        }
+        
+        const discountPercentage = prompt('Enter discount percentage for all products in this category:');
+        if (!discountPercentage) return;
+        
+        try {
+            const response = await axios.post(`${apiUrl}/api/admin/products/set-sale-by-category`, {
+                categoryId: selectedCategory,
+                discountPercentage: parseFloat(discountPercentage)
+            }, {
+                headers: {
+                    authorization: `${sessionStorage.getItem('token')}`
+                }
+            });
+            
+            alert(`Success: ${response.data.message}`);
+            fetchProducts();
+        } catch (error) {
+            console.error('Error setting sale by category:', error);
+            alert('Error: ' + (error.response?.data?.message || error.message));
+        }
+    };
+
+    const clearFilters = () => {
+        setSearch('');
+        setSelectedCategory('');
+        setSortOrder('newest');
+        setMinPrice('');
+        setMaxPrice('');
+        setOnSaleFilter('');
+    };
+
     return (
         <div className="panel mt-6">
             <div className="mb-5 flex flex-col gap-5 md:flex-row md:items-center">
                 <h5 className="text-lg font-semibold dark:text-white-light">Products</h5>
-                <button className="btn btn-primary" onClick={handleAddProduct}>Add Product</button>
+                <div className="flex flex-wrap gap-2">
+                    <button className="btn btn-primary" onClick={handleAddProduct}>Add Product</button>
+                    <button className="btn btn-info" onClick={handleCalculateAllPrices}>
+                        <IconCalculator className="w-5 h-5 mr-2" />
+                        Recalculate Prices
+                    </button>
+                    <button 
+                        className="btn btn-warning" 
+                        onClick={handleSetSaleByCategory}
+                        disabled={!selectedCategory}
+                    >
+                        Set Sale for Category
+                    </button>
+                </div>
                 <div className="ltr:ml-auto rtl:mr-auto">
-                    <input
-                        type="text"
-                        className="form-input w-auto"
-                        placeholder="Search..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)} />
-                </div>
-                <div>
-                    <select
-                        className="form-select"
-                        value={selectedCategory}
-                        onChange={handleCategoryChange}>
-                        <option value="">All Categories</option>
-                        {categories.map((category) => (
-                            <option key={category._id} value={category._id}>
-                                {category.name}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                <div style={{width: '100px'}}>
-                    <select
-                        className="form-select"
-                        value={sortOrder}
-                        onChange={(e) => setSortOrder(e.target.value)}>
-                        <option value="newest">Newest</option>
-                        <option value="oldest">Oldest</option>
-                    </select>
+                    <button 
+                        className="btn btn-outline-primary mb-2 md:mb-0" 
+                        onClick={() => setShowFilters(!showFilters)}
+                    >
+                        {showFilters ? 'Hide Filters' : 'Show Filters'}
+                    </button>
                 </div>
             </div>
+
+            {showFilters && (
+                <div className="mb-5 grid grid-cols-1 gap-4 md:grid-cols-4">
+                    <div>
+                        <label className="block mb-2 text-sm">Search</label>
+                        <input
+                            type="text"
+                            className="form-input w-full"
+                            placeholder="Search..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)} 
+                        />
+                    </div>
+                    <div>
+                        <label className="block mb-2 text-sm">Category</label>
+                        <select
+                            className="form-select w-full"
+                            value={selectedCategory}
+                            onChange={handleCategoryChange}
+                        >
+                            <option value="">All Categories</option>
+                            {categories.map((category) => (
+                                <option key={category._id} value={category._id}>
+                                    {category.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                        <div>
+                            <label className="block mb-2 text-sm">Min Price</label>
+                            <input
+                                type="number"
+                                className="form-input w-full"
+                                placeholder="Min"
+                                value={minPrice}
+                                onChange={(e) => setMinPrice(e.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <label className="block mb-2 text-sm">Max Price</label>
+                            <input
+                                type="number"
+                                className="form-input w-full"
+                                placeholder="Max"
+                                value={maxPrice}
+                                onChange={(e) => setMaxPrice(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                        <div>
+                            <label className="block mb-2 text-sm">On Sale</label>
+                            <select
+                                className="form-select w-full"
+                                value={onSaleFilter}
+                                onChange={(e) => setOnSaleFilter(e.target.value)}
+                            >
+                                <option value="">All</option>
+                                <option value="true">Yes</option>
+                                <option value="false">No</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block mb-2 text-sm">Sort By</label>
+                            <select
+                                className="form-select w-full"
+                                value={sortOrder}
+                                onChange={handleSortOrderChange}
+                            >
+                                <option value="newest">Newest</option>
+                                <option value="oldest">Oldest</option>
+                                <option value="price-low">Price: Low to High</option>
+                                <option value="price-high">Price: High to Low</option>
+                                <option value="name-asc">Name: A to Z</option>
+                                <option value="name-desc">Name: Z to A</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div className="md:col-span-4 flex justify-end">
+                        <button className="btn btn-outline-danger" onClick={clearFilters}>
+                            Clear Filters
+                        </button>
+                    </div>
+                </div>
+            )}
+
             <div className="datatables">
                 <DataTable
                     className="table-hover whitespace-nowrap"
@@ -163,7 +310,8 @@ const ComponentsDatatablesCheckbox = () => {
                         { 
                             accessor: 'title',
                             title: 'Title',
-                            sortable: true 
+                            sortable: true,
+                            width: '20%'
                         },
                         { 
                             accessor: 'categoryId',
@@ -176,23 +324,51 @@ const ComponentsDatatablesCheckbox = () => {
                         },
                         { 
                             accessor: 'price',
-                            title: 'Price',
+                            title: 'Current Price',
                             sortable: true,
                             render: ({ price }) => `$${price.toFixed(2)}`
                         },
                         { 
+                            accessor: 'priceBeforeSale',
+                            title: 'Original Price',
+                            sortable: true,
+                            render: ({ priceBeforeSale, price, onSale }) => 
+                                onSale ? `$${priceBeforeSale?.toFixed(2) || price.toFixed(2)}` : '-'
+                        },
+                        { 
+                            accessor: 'discountPercentage',
+                            title: 'Discount',
+                            sortable: true,
+                            render: ({ discountPercentage, onSale }) => 
+                                onSale ? `${discountPercentage?.toFixed(2) || 0}%` : '-'
+                        },
+                        { 
                             accessor: 'stock',
                             title: 'Stock',
-                            sortable: true 
+                            sortable: true
+                        },
+                        {
+                            accessor: 'onSale',
+                            title: 'On Sale',
+                            sortable: true,
+                            render: ({ onSale }) => (
+                                <span className={`badge ${onSale ? 'bg-success' : 'bg-danger'}`}>
+                                    {onSale ? 'Yes' : 'No'}
+                                </span>
+                            )
                         },
                         {
                             accessor: 'actions',
                             title: 'Actions',
-                            width: '20%',
+                            width: '10%',
                             render: (record) => (
-                                <div className="action-buttons" style={{ width: "100%" }}>
-                                    <button title="Edit" onClick={() => handleEdit(record._id)}><IconPencilPaper /></button>
-                                    <button title="Delete" onClick={() => handleDelete(record._id)}><IconTrashLines /></button>
+                                <div className="flex items-center gap-2">
+                                    <button title="Edit" onClick={() => handleEdit(record._id)}>
+                                        <IconPencilPaper className="h-5 w-5 text-primary" />
+                                    </button>
+                                    <button title="Delete" onClick={() => handleDelete(record._id)}>
+                                        <IconTrashLines className="h-5 w-5 text-danger" />
+                                    </button>
                                 </div>
                             ),
                         },
@@ -210,6 +386,8 @@ const ComponentsDatatablesCheckbox = () => {
                     onSelectedRecordsChange={setSelectedRecords}
                     minHeight={200}
                     paginationText={({ from, to, totalRecords }) => `Showing ${from} to ${to} of ${totalRecords} entries`}
+                    loading={isLoading}
+                    noRecordsText="No products found"
                 />
             </div>
         </div>

@@ -4,6 +4,8 @@ const cors = require('cors');
 const app = express();
 const router = require('./api/routers/index');
 const path = require('path');
+const http = require('http');
+const { initSocket } = require('./socket');
 
 const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development';
 require('dotenv').config({ path: envFile });
@@ -37,8 +39,14 @@ app.get('/', (req, res) => {
     res.send('Hello World');
 });
 
+// Tạo HTTP server để sử dụng với Socket.IO
+const server = http.createServer(app);
 
-app.listen(port, () => {
+// Khởi tạo Socket.IO
+initSocket(server);
+
+// Sử dụng server.listen thay vì app.listen
+server.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
 

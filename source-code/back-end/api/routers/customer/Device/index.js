@@ -6,3 +6,5 @@ const deviceIdentificationController = require('../../../controllers/customer/de
 router.post('/identify', deviceIdentificationController.identifyDevice);
 
 module.exports = router; 
+
+

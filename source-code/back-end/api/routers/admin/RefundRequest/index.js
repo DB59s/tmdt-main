@@ -8,8 +8,11 @@ const roleMiddleware = require('../../../../middleware/roleMiddleware');
 // Route lấy tất cả yêu cầu hoàn tiền
 router.get('/', authMiddleware(), roleMiddleware(['1']), refundRequestController.getAllRefundRequests);
 
+// Route lấy thống kê yêu cầu hoàn tiền
+router.get('/statistics', authMiddleware(), roleMiddleware(['1']), refundRequestController.getRefundStatistics);
+
 // Route lấy chi tiết yêu cầu hoàn tiền
-router.get('/:id',authMiddleware(), roleMiddleware(['1']), refundRequestController.getRefundRequestById);
+router.get('/refund-request/:id',authMiddleware(), roleMiddleware(['1']), refundRequestController.getRefundRequestById);
 
 // Route cập nhật trạng thái yêu cầu hoàn tiền
 router.put('/:id', authMiddleware(), roleMiddleware(['1']), refundRequestController.updateRefundRequest);

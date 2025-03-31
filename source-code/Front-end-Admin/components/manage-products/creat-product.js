@@ -6,6 +6,7 @@ import IconX from '@/components/icon/icon-x';
 import IconPlus from '@/components/icon/icon-plus';
 
 const CreateProduct = () => {
+    const apiUrl = process.env.domainApi;
     const router = useRouter();
     const [categories, setCategories] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -39,7 +40,7 @@ const CreateProduct = () => {
         // Lấy danh sách danh mục
         const fetchCategories = async () => {
             try {
-                const response = await axios.get('https://vuquangduy.io.vn/api/categories');
+                const response = await axios.get(`${apiUrl}/api/customer/categories`);
                 setCategories(response.data);
             } catch (error) {
                 console.error('Lỗi khi lấy danh mục:', error);
@@ -168,7 +169,7 @@ const CreateProduct = () => {
             };
 
             // Gửi request tạo sản phẩm
-            const response = await axios.post('https://vuquangduy.io.vn/api/admin/products', productData, {
+            const response = await axios.post(`${apiUrl}/api/admin/products`, productData, {
                 headers: {
                     'Content-Type': 'application/json',
                     'authorization': `${sessionStorage.getItem('token')}`

@@ -4,15 +4,18 @@ import store from '@/store';
 import { Provider } from 'react-redux';
 import React, { Suspense } from 'react';
 import Loading from '@/components/layouts/loading';
+import { ToastProvider } from '@/components/ui/toast';
 
 const ProviderComponent = ({
     children
 }) => {
     return (
         <Provider store={store}>
-            <Suspense fallback={<Loading />}>
-                <App>{children} </App>
-            </Suspense>
+            <ToastProvider>
+                <Suspense fallback={<Loading />}>
+                    <App>{children} </App>
+                </Suspense>
+            </ToastProvider>
         </Provider>
     );
 };

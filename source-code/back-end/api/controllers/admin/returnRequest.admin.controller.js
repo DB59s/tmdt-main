@@ -8,6 +8,8 @@ const mongoose = require('mongoose');
  * Lấy danh sách tất cả yêu cầu đổi/trả hàng với phân trang và lọc
  */
 exports.getAllReturnRequests = async (req, res) => {
+    console.log('getAllReturnRequests');
+    console.log(req.query);
     try {
         const { 
             page = 1, 
@@ -69,6 +71,127 @@ exports.getAllReturnRequests = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Lỗi server khi lấy danh sách yêu cầu đổi/trả hàng',
+            error: error.message
+        });
+    }
+};
+
+/**
+ * Lấy thống kê yêu cầu đổi/trả hàng
+ */
+exports.getReturnStatistics = async (req, res) => {
+    try {
+        // Xây dựng bộ lọc dựa trên query params
+        const filter = {};
+        
+        // Lọc theo khoảng thời gian
+        if (req.query.startDate && req.query.endDate) {
+            filter.createdAt = {
+                $gte: new Date(req.query.startDate),
+                $lte: new Date(req.query.endDate)
+            };
+        } else if (req.query.startDate) {
+            filter.createdAt = { $gte: new Date(req.query.startDate) };
+        } else if (req.query.endDate) {
+            filter.createdAt = { $lte: new Date(req.query.endDate) };
+        }
+        
+        // Đếm tổng số yêu cầu
+        const totalRequests = await ReturnRequest.countDocuments(filter);
+        
+        // Thống kê theo loại yêu cầu
+        const typeStats = await ReturnRequest.aggregate([
+            { $match: filter },
+            { $group: { _id: '$requestType', count: { $sum: 1 } } }
+        ]);
+        
+        // Thống kê theo trạng thái
+        const statusStats = await ReturnRequest.aggregate([
+            { $match: filter },
+            { $group: { _id: '$status', count: { $sum: 1 } } }
+        ]);
+        
+        // Format kết quả theo yêu cầu của front-end
+        const returnTypeCount = typeStats.find(item => item._id === 'refund')?.count || 0;
+        const exchangeTypeCount = typeStats.find(item => item._id === 'exchange')?.count || 0;
+        
+        // Số lượng yêu cầu theo trạng thái
+        const pendingRequests = statusStats.find(item => item._id === 'pending')?.count || 0;
+        const completedRequests = statusStats.find(item => item._id === 'completed')?.count || 0;
+        const rejectedRequests = statusStats.find(item => item._id === 'rejected')?.count || 0;
+        
+        // Thống kê theo tháng (trong năm hiện tại hoặc năm được chỉ định)
+        const year = req.query.year ? parseInt(req.query.year) : new Date().getFullYear();
+        const monthlyStats = await ReturnRequest.aggregate([
+            {
+                $match: {
+                    ...filter,
+                    createdAt: {
+                        $gte: new Date(`${year}-01-01`),
+                        $lte: new Date(`${year}-12-31`)
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: { $month: '$createdAt' },
+                    count: { $sum: 1 }
+                }
+            },
+            { $sort: { _id: 1 } }
+        ]);
+        
+        // Chuẩn bị dữ liệu thống kê hàng tháng
+        const monthlyData = Array(12).fill().map((_, i) => ({
+            month: i + 1,
+            count: 0
+        }));
+        
+        monthlyStats.forEach(item => {
+            const monthIndex = item._id - 1;
+            monthlyData[monthIndex].count = item.count;
+        });
+        
+        // Thống kê theo các lý do đổi/trả hàng phổ biến
+        const reasonStats = await ReturnRequest.aggregate([
+            { $match: filter },
+            { $group: { _id: '$reason', count: { $sum: 1 } } },
+            { $sort: { count: -1 } },
+            { $limit: 5 }
+        ]);
+        
+        const topReasons = reasonStats.map(item => ({
+            reason: item._id,
+            count: item.count
+        }));
+        
+        // Cấu trúc phản hồi API theo đúng yêu cầu của front-end
+        const responseData = {
+            totalRequests,
+            pendingRequests,
+            completedRequests,
+            rejectedRequests,
+            returnTypeCount,
+            exchangeTypeCount,
+            // Thêm dữ liệu chi tiết để mở rộng trong tương lai
+            details: {
+                monthlyData,
+                topReasons,
+                statusDistribution: statusStats,
+                typeDistribution: typeStats
+            }
+        };
+        
+        res.status(200).json({
+            success: true,
+            message: 'Lấy thống kê yêu cầu đổi/trả hàng thành công',
+            data: responseData
+        });
+    } catch (error) {
+        console.error('Error fetching return statistics:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Lỗi server khi lấy thống kê yêu cầu đổi/trả hàng',
             error: error.message
         });
     }

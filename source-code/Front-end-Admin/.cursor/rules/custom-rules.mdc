@@ -1,0 +1,32 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Your rule content
+
+Architecture and Routing
+Project is built with Next.js using App Router and folder-based routing
+The app directory is the main container for all routes and components
+Routes follow Next.js App Router conventions with special route groups
+Directory Organization
+/app/(auth): Contains authentication-related routes and pages
+Includes auth and pages subdirectories
+Contains a layout.jsx for auth-specific layouts
+/app/(defaults): Contains all main application routes
+Each subdirectory directly corresponds to a route
+Example: /app/(defaults)/manage-products → localhost:8080/manage-products
+/components: Contains UI components organized by feature/route
+Components should be modular and reusable where possible
+/styles: Contains project-wide CSS files and styling utilities
+Component Structure
+Use functional components with TypeScript
+Group related components in feature-specific directories
+Follow component hierarchy that matches the routing structure
+Create specialized components for each route as needed
+Development Standards
+Use TypeScript for type safety
+Implement responsive design with appropriate breakpoints
+Follow Next.js best practices for data fetching and rendering
+Organize imports logically and minimize dependencies between components

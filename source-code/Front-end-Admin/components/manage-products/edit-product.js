@@ -5,6 +5,7 @@ import axios from 'axios';
 import IconX from '@/components/icon/icon-x';
 
 const EditProduct = ({ productID }) => {
+    const apiUrl = process.env.domainApi;
     const router = useRouter();
     const [categories, setCategories] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -39,7 +40,7 @@ const EditProduct = ({ productID }) => {
         // Lấy danh sách danh mục
         const fetchCategories = async () => {
             try {
-                const response = await axios.get('https://vuquangduy.io.vn/api/categories');
+                const response = await axios.get(`${apiUrl}/api/customer/categories`);
                 setCategories(response.data);
             } catch (error) {
                 console.error('Lỗi khi lấy danh mục:', error);
@@ -50,7 +51,7 @@ const EditProduct = ({ productID }) => {
         // Lấy thông tin sản phẩm cần chỉnh sửa
         const fetchProductDetails = async () => {
             try {
-                const response = await axios.get(`https://vuquangduy.io.vn/api/products/${productID}`, {
+                const response = await axios.get(`${apiUrl}/api/customer/products/${productID}`, {
                     headers: {
                         authorization: `${sessionStorage.getItem('token')}`
                     }
@@ -225,7 +226,7 @@ const EditProduct = ({ productID }) => {
             };
 
             // Gửi request cập nhật sản phẩm
-            const response = await axios.patch(`https://vuquangduy.io.vn/api/admin/products/${productID}`, productData, {
+            const response = await axios.patch(`${apiUrl}/api/admin/products/${productID}`, productData, {
                 headers: {
                     'Content-Type': 'application/json',
                     'authorization': `${sessionStorage.getItem('token')}`

@@ -31,6 +31,7 @@ module.exports.calculatePriceBeforeSale = async (req, res) => {
 
 // Thêm sản phẩm mới
 module.exports.createProduct = async (req, res) => {
+    console.log(req.body);
     try {
         const {
             title,
@@ -72,6 +73,33 @@ module.exports.createProduct = async (req, res) => {
             calculatedPriceBeforeSale = price;
         }
 
+        // Xử lý trường dimensions nếu là chuỗi
+        let parsedDimensions = dimensions;
+        if (typeof dimensions === 'string') {
+            // Tách chuỗi theo dấu 'x' và chuyển đổi thành số
+            const dimensionParts = dimensions.split('x').map(part => parseFloat(part.trim()));
+            
+            // Kiểm tra nếu đủ 3 phần: width, height, depth
+            if (dimensionParts.length === 3) {
+                parsedDimensions = {
+                    width: dimensionParts[0],
+                    height: dimensionParts[1],
+                    depth: dimensionParts[2]
+                };
+            } else {
+                return res.status(400).json({
+                    message: 'Định dạng dimensions không hợp lệ. Vui lòng sử dụng format "width x height x depth"'
+                });
+            }
+        }
+
+        // Kiểm tra brand có hợp lệ không
+        if (!brand || brand.trim() === '') {
+            return res.status(400).json({
+                message: 'Thương hiệu (brand) là bắt buộc'
+            });
+        }
+
         const product = new Product({
             title,
             description,
@@ -85,7 +113,7 @@ module.exports.createProduct = async (req, res) => {
             brand,
             sku,
             weight,
-            dimensions,
+            dimensions: parsedDimensions,
             warrantyInformation,
             shippingInformation,
             availabilityStatus,
@@ -109,52 +137,62 @@ module.exports.createProduct = async (req, res) => {
     }
 };
 
-// Cập nhật sản phẩm
+// Cập nhật thông tin sản phẩm
 module.exports.updateProduct = async (req, res) => {
     try {
-        const { id } = req.params;
+        const productId = req.params.id;
         const updateData = req.body;
-
-        // Kiểm tra xem sản phẩm có tồn tại không
-        const product = await Product.findById(id);
-        if (!product) {
+        
+        // Xử lý dimensions nếu là chuỗi
+        if (updateData.dimensions && typeof updateData.dimensions === 'string') {
+            // Tách chuỗi theo dấu 'x' và chuyển đổi thành số
+            const dimensionParts = updateData.dimensions.split('x').map(part => parseFloat(part.trim()));
+            
+            // Kiểm tra nếu đủ 3 phần: width, height, depth
+            if (dimensionParts.length === 3) {
+                updateData.dimensions = {
+                    width: dimensionParts[0],
+                    height: dimensionParts[1],
+                    depth: dimensionParts[2]
+                };
+            } else {
+                return res.status(400).json({
+                    message: 'Định dạng dimensions không hợp lệ. Vui lòng sử dụng format "width x height x depth"'
+                });
+            }
+        }
+        
+        // Tính lại priceBeforeSale nếu cần
+        if (updateData.price && updateData.discountPercentage && !updateData.priceBeforeSale) {
+            updateData.priceBeforeSale = updateData.price / (1 - (updateData.discountPercentage / 100));
+            updateData.priceBeforeSale = Math.round(updateData.priceBeforeSale * 100) / 100;
+        }
+        
+        // Cập nhật onSale dựa trên discountPercentage nếu có
+        if (updateData.discountPercentage > 0) {
+            updateData.onSale = true;
+        }
+        
+        // Kiểm tra brand có hợp lệ không nếu được cập nhật
+        if (updateData.brand !== undefined && (!updateData.brand || updateData.brand.trim() === '')) {
+            return res.status(400).json({
+                message: 'Thương hiệu (brand) là bắt buộc'
+            });
+        }
+        
+        const updatedProduct = await Product.findByIdAndUpdate(
+            productId,
+            { $set: updateData },
+            { new: true, runValidators: true }
+        );
+        
+        if (!updatedProduct) {
             return res.status(404).json({
                 message: 'Không tìm thấy sản phẩm'
             });
         }
-
-        // Nếu có cập nhật SKU, kiểm tra xem SKU mới đã tồn tại chưa
-        if (updateData.sku && updateData.sku !== product.sku) {
-            const existingSku = await Product.findOne({ sku: updateData.sku });
-            if (existingSku) {
-                return res.status(400).json({
-                    message: 'SKU đã tồn tại'
-                });
-            }
-        }
-
-        // Tính toán priceBeforeSale nếu có cập nhật price hoặc discountPercentage
-        if ((updateData.price || updateData.discountPercentage) && !updateData.priceBeforeSale) {
-            const newPrice = updateData.price || product.price;
-            const newDiscountPercentage = updateData.discountPercentage || product.discountPercentage;
-            
-            if (newDiscountPercentage > 0) {
-                updateData.priceBeforeSale = newPrice / (1 - (newDiscountPercentage / 100));
-                updateData.priceBeforeSale = Math.round(updateData.priceBeforeSale * 100) / 100;
-                updateData.onSale = true;
-            } else if (updateData.price && !updateData.discountPercentage) {
-                updateData.priceBeforeSale = newPrice;
-            }
-        }
-
-        // Cập nhật sản phẩm
-        const updatedProduct = await Product.findByIdAndUpdate(
-            id,
-            { $set: updateData },
-            { new: true, runValidators: true }
-        );
-
-        res.json({
+        
+        res.status(200).json({
             message: 'Cập nhật sản phẩm thành công',
             product: updatedProduct
         });
