@@ -56,10 +56,6 @@ typings/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
-.env
-.env.production
-.env.development
 
 # next.js build output
 .next/
@@ -134,10 +130,6 @@ coverage/
 # Bower dependency directory (https://bower.io/)
 bower_components/
 
-# dotenv environment variables file
-.env
-.env.development
-.env.production
 
 # MacOS
 .DS_Store

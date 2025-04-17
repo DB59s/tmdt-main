@@ -49,7 +49,7 @@ module.exports.createOrder = async (req, res) => {
         }
 
         // Validate payment method is valid enum value
-        const validPaymentMethods = ['Thanh toán khi nhận hàng', 'Chuyển khoản qua ngân hàng'];
+        const validPaymentMethods = ['Thanh toán khi nhận hàng', 'Chuyển khoản qua ngân hàng', 'Thanh toán qua Momo', 'Thanh toán qua VNPay', 'Thanh toán qua Solana' , 'Thanh toán qua USDT'];
         if (!validPaymentMethods.includes(paymentMethod)) {
             return res.status(400).json({
                 code: 400,
@@ -598,7 +598,7 @@ module.exports.cancelOrder = async (req, res) => {
             updatedBy: 'customer'
         });
         await orderTracking.save();
-        
+            
         // Restore product stock
         const orderItems = await OrderItem.find({ orderId: order._id });
         

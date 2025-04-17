@@ -27,6 +27,7 @@ const profileRouter = require('./customer/Profile');
 const cartRouter = require('./customer/Cart');
 const wishlistRouter = require('./customer/Wishlist/wishlist.router');
 const returnRequestRouter = require('./customer/ReturnRequest/returnRequest.router');
+const paymentRouter = require('./customer/payment.router');
 
 module.exports = (app) => {
     // Thiết lập thư mục uploads là thư mục tĩnh để truy cập các file đã upload
@@ -58,5 +59,6 @@ module.exports = (app) => {
     app.use('/api/customer/categories', categoryRouter);
     app.use('/api/customer/reviews', reviewRouter);
     app.use('/api/customer/discount', discountRouter);
+    app.use('/api/customer/payment', paymentRouter);
 }
 

@@ -166,7 +166,7 @@ const MyReturnsPage = () => {
                                request.status === 'rejected' ? 'Từ chối' : request.status}
                             </span>
                           </td>
-                          <td>${request.totalRefundAmount?.toFixed(2) || '0.00'}</td>
+                          <td>{request.totalRefundAmount?.toLocaleString('vi-VN') || '0'} đ</td>
                           <td>
                             <Link href={`/my-returns/${request._id}`} className="btn btn-sm btn-info me-2">
                               <i className="fa fa-eye"></i>

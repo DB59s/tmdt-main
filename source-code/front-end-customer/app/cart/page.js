@@ -168,6 +168,12 @@ export default function Cart() {
         toast.success('Cart updated successfully')
     }
     
+    // Format currency to VND
+    const formatCurrency = (amount) => {
+        const numAmount = Number(amount) || 0
+        return numAmount.toLocaleString('vi-VN') + ' ₫'
+    }
+    
     // Calculate totals
     const subtotal = cart?.items?.reduce((acc, item) => {
         const priceToUse = item.onSale ? item.price : (item.priceBeforeSale || item.price)
@@ -236,11 +242,11 @@ export default function Cart() {
                                                             <td className="product-price">
                                                                 {item.onSale ? (
                                                                     <>
-                                                                        <del>${(item.priceBeforeSale || 0).toFixed(2)}</del>
-                                                                        <span>${(item.price || 0).toFixed(2)}</span>
+                                                                        <del>{formatCurrency(item.priceBeforeSale || 0)}</del>
+                                                                        <span>{formatCurrency(item.price || 0)}</span>
                                                                     </>
                                                                 ) : (
-                                                                    <span>${(item.priceBeforeSale || item.price || 0).toFixed(2)}</span>
+                                                                    <span>{formatCurrency(item.priceBeforeSale || item.price || 0)}</span>
                                                                 )}
                                                             </td>
                                                             <td className="product-quantity">
@@ -261,7 +267,7 @@ export default function Cart() {
                                                             </td>
                                                             <td className="product-subtotal">
                                                                 <span className="amount">
-                                                                    ${((item.onSale ? item.price : (item.priceBeforeSale || item.price)) * item.quantity).toFixed(2)}
+                                                                    {formatCurrency((item.onSale ? item.price : (item.priceBeforeSale || item.price)) * item.quantity)}
                                                                 </span>
                                                             </td>
                                                             <td className="product-remove">
@@ -278,7 +284,7 @@ export default function Cart() {
                                                 </tbody>
                                             </table>
                                         </div>
-                                        <div className="row">
+                                        {/* <div className="row">
                                             <div className="col-12">
                                                 <div className="coupon-all">
                                                     <div className="coupon">
@@ -320,16 +326,18 @@ export default function Cart() {
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </div> */}
                                         <div className="row justify-content-end">
                                             <div className="col-md-5">
                                                 <div className="cart-page-total">
                                                     <h2>Cart totals</h2>
                                                     <ul className="mb-20">
-                                                        <li>Subtotal <span>${subtotal.toFixed(2)}</span></li>
-                                                        <li>Total <span>${total.toFixed(2)}</span></li>
+                                                        <li>Subtotal <span>{formatCurrency(subtotal)}</span></li>
+                                                        <li>Total <span>{formatCurrency(total)}</span></li>
                                                     </ul>
-                                                    <Link href="/checkout" className="tp-btn tp-color-btn banner-animation">Proceed to Checkout</Link>
+                                                    <a href="#" className="tp-btn tp-color-btn banner-animation" onClick={() => router.push('/checkout')}>
+                                                        Proceed to checkout
+                                                    </a>
                                                 </div>
                                             </div>
                                         </div>

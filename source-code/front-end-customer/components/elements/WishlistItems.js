@@ -194,18 +194,18 @@ const WishlistItems = () => {
           <td className="product-price">
             {item.onSale ? (
               <span className="amount">
-                <del className="me-2 text-muted">${(item.priceBeforeSale || 0).toFixed(2)}</del>
-                <span className="text-danger">${(item.price || 0).toFixed(2)}</span>
+                <del className="me-2 text-muted">{(item.priceBeforeSale || 0).toLocaleString('vi-VN')}đ</del>
+                <span className="text-danger">{(item.price || 0).toLocaleString('vi-VN')}đ</span>
               </span>
             ) : (
-              <span className="amount">${(item.price || 0).toFixed(2)}</span>
+              <span className="amount">{(item.price || 0).toLocaleString('vi-VN')}đ</span>
             )}
           </td>
           <td className="product-quantity">
             <span>1</span>
           </td>
           <td className="product-subtotal">
-            <span className="amount">${(item.price || 0).toFixed(2)}</span>
+            <span className="amount">{(item.price || 0).toLocaleString('vi-VN')}đ</span>
           </td>
           <td className="product-add-to-cart">
             <button 

@@ -60,6 +60,12 @@ export default function HeaderCart({ isCartSidebar, handleCartSidebar }) {
         }, 0)
     }
 
+    // Format currency to VND
+    const formatCurrency = (amount) => {
+        const numAmount = Number(amount) || 0
+        return numAmount.toLocaleString('vi-VN') + ' ₫'
+    }
+
     const removeItem = async (productId) => {
         try {
             const customerId = localStorage.getItem('customerId')
@@ -137,9 +143,9 @@ export default function HeaderCart({ isCartSidebar, handleCartSidebar }) {
                                                         <div className="tpcart__cart-price">
                                                             <span className="quantity">{item.quantity} x </span>
                                                             {item.onSale ? (
-                                                                <span className="new-price">${item.price.toFixed(2)}</span>
+                                                                <span className="new-price">{formatCurrency(item.price)}</span>
                                                             ) : (
-                                                                <span className="new-price">${(item.priceBeforeSale || item.price).toFixed(2)}</span>
+                                                                <span className="new-price">{formatCurrency(item.priceBeforeSale || item.price)}</span>
                                                             )}
                                                         </div>
                                                     </div>
@@ -151,7 +157,7 @@ export default function HeaderCart({ isCartSidebar, handleCartSidebar }) {
                                 <div className="tpcart__checkout">
                                     <div className="tpcart__total-price d-flex justify-content-between align-items-center">
                                         <span>Subtotal:</span>
-                                        <span className="heilight-price">${cartData.totalAmount.toFixed(2)}</span>
+                                        <span className="heilight-price">{formatCurrency(cartData.totalAmount)}</span>
                                     </div>
                                     <div className="tpcart__checkout-btn">
                                         <Link className="tpcart-btn mb-10" href="/cart" onClick={handleCartSidebar}>View Cart</Link>

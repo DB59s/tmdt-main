@@ -238,7 +238,7 @@ const OrderTracking = () => {
                         <p><strong>Payment Method:</strong> {orderData.order.paymentMethod}</p>
                         <p><strong>Payment Status:</strong> {orderData.order.paymentStatus}</p>
                         <p><strong>Shipping Address:</strong> {orderData.order.shippingAddress}</p>
-                        <p><strong>Total Amount:</strong> ${orderData.order.totalAmount.toFixed(2)}</p>
+                        <p><strong>Total Amount:</strong> {orderData.order.totalAmount.toLocaleString('vi-VN')}đ</p>
                       </div>
                     </div>
                     
@@ -344,19 +344,19 @@ const OrderTracking = () => {
                                 </div>
                               </td>
                               <td>{item.quantity}</td>
-                              <td>${item.price.toFixed(2)}</td>
-                              <td>${(item.price * item.quantity).toFixed(2)}</td>
+                              <td>{item.price.toLocaleString('vi-VN')}đ</td>
+                              <td>{(item.price * item.quantity).toLocaleString('vi-VN')}đ</td>
                             </tr>
                           ))}
                         </tbody>
                         <tfoot>
                           <tr>
                             <th colSpan="3" className="text-end">Subtotal:</th>
-                            <td>${orderData.order.totalAmount.toFixed(2)}</td>
+                            <td>{orderData.order.totalAmount.toLocaleString('vi-VN')}đ</td>
                           </tr>
                           <tr>
                             <th colSpan="3" className="text-end">Total:</th>
-                            <td><strong>${orderData.order.totalAmount.toFixed(2)}</strong></td>
+                            <td><strong>{orderData.order.totalAmount.toLocaleString('vi-VN')}đ</strong></td>
                           </tr>
                         </tfoot>
                       </table>

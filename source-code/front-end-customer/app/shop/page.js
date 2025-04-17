@@ -12,7 +12,7 @@ const ShopPage = () => {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState(null)
-  const [priceRange, setPriceRange] = useState({ min: 0, max: 1000 })
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 1000000000 })
   const [sortOption, setSortOption] = useState('newest')
   const [perPage, setPerPage] = useState(12)
   const [viewMode, setViewMode] = useState('grid')
@@ -102,8 +102,26 @@ const ShopPage = () => {
 
   return (
     <Layout headerStyle={3} footerStyle={1} breadcrumbTitle="Shop">
-      <div className="product-filter-area pt-65 pb-40">
+      <div className="product-filter-area pt-65 pb-40" style={{ backgroundColor: "#f9f9f9" }}>
         <div className="container">
+          <div style={{ marginBottom: "30px", textAlign: "center" }}>
+            <h2 style={{ 
+              fontSize: "32px", 
+              fontWeight: "700", 
+              marginBottom: "15px", 
+              color: "#333" 
+            }}>
+              Products Collection
+            </h2>
+            <p style={{ 
+              fontSize: "16px", 
+              color: "#666", 
+              maxWidth: "700px", 
+              margin: "0 auto" 
+            }}>
+              Discover our wide range of products with the best quality and prices
+            </p>
+          </div>
           <FilterShopBox 
             itemStart={1} 
             itemEnd={categories?.length || 0} 
@@ -125,13 +143,27 @@ const ShopPage = () => {
         </div>
       </div>
       
-      <section className="shop-area pt-30 pb-100">
+      <section className="shop-area pt-50 pb-100" style={{ backgroundColor: "#ffffff" }}>
         <div className="container">
           <div className="row">
             <div className="col-lg-12">
-              <div className="shop-banner mb-30">
-
-              </div>
+              {onSaleFilter === true && (
+                <div style={{ 
+                  marginBottom: "30px", 
+                  backgroundColor: "#fff4f1", 
+                  padding: "15px 20px", 
+                  borderRadius: "10px",
+                  border: "1px dashed #ff4a17" 
+                }}>
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <i className="fa fa-fire" style={{ color: "#ff4a17", fontSize: "24px", marginRight: "15px" }}></i>
+                    <div>
+                      <h3 style={{ fontSize: "18px", margin: "0 0 5px 0", color: "#333" }}>On Sale Products</h3>
+                      <p style={{ margin: "0", color: "#666", fontSize: "14px" }}>Discover great deals with discounts up to 70% off</p>
+                    </div>
+                  </div>
+                </div>
+              )}
               
               <ProductList 
                 category={selectedCategory}

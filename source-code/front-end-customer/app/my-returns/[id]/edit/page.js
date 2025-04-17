@@ -465,7 +465,7 @@ const EditReturnRequest = () => {
                                     </div>
                                     <div>
                                       <p className="mb-0">{item.productId.title}</p>
-                                      <small className="text-muted">Giá: ${item.price?.toFixed(2) || '0.00'}</small>
+                                      <small className="text-muted">Giá: {item.price?.toLocaleString('vi-VN') || '0'} đ</small>
                                     </div>
                                   </div>
                                 </td>

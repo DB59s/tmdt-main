@@ -8,6 +8,7 @@ import IconPencilPaper from '@/components/icon/icon-pencil-paper';
 import IconCalculator from '@/components/icon/icon-calculator';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { formatCurrency } from '@/utils/format';
 
 const ProductsList = () => {
     const apiUrl = process.env.domainApi;
@@ -290,14 +291,14 @@ const ProductsList = () => {
                             accessor: 'price',
                             title: 'Current Price',
                             sortable: true,
-                            render: ({ price }) => `$${price.toFixed(2)}`
+                            render: ({ price }) => formatCurrency(price)
                         },
                         { 
                             accessor: 'priceBeforeSale',
                             title: 'Original Price',
                             sortable: true,
                             render: ({ priceBeforeSale, price, onSale }) => 
-                                onSale ? `$${priceBeforeSale?.toFixed(2) || price.toFixed(2)}` : '-'
+                                onSale ? formatCurrency(priceBeforeSale || price) : '-'
                         },
                         { 
                             accessor: 'discountPercentage',

@@ -103,6 +103,12 @@ const OnSaleProducts = () => {
     router.push('/shop?onSale=true')
   }
 
+  // Format currency to VND
+  const formatCurrency = (amount) => {
+    const numAmount = Number(amount) || 0
+    return numAmount.toLocaleString('vi-VN') + ' ₫'
+  }
+
   if (loading) {
     return (
       <section className="product-area mt-40 mb-40">
@@ -305,11 +311,17 @@ const OnSaleProducts = () => {
                     <div className="product-price">
                       {product.onSale ? (
                         <>
-                          <del style={{ color: "#999", marginRight: "8px", fontSize: "14px" }}>${(product.priceBeforeSale || 0).toFixed(2)}</del>
-                          <span style={{ color: "#ff4a17", fontWeight: "700", fontSize: "16px" }}>${(product.price || 0).toFixed(2)}</span>
+                          <del style={{ color: "#999", marginRight: "8px", fontSize: "14px" }}>
+                            {formatCurrency(product.priceBeforeSale || 0)}
+                          </del>
+                          <span style={{ color: "#ff4a17", fontWeight: "700", fontSize: "16px" }}>
+                            {formatCurrency(product.price || 0)}
+                          </span>
                         </>
                       ) : (
-                        <span style={{ color: "#333", fontWeight: "700", fontSize: "16px" }}>${(product.price || 0).toFixed(2)}</span>
+                        <span style={{ color: "#333", fontWeight: "700", fontSize: "16px" }}>
+                          {formatCurrency(product.price || 0)}
+                        </span>
                       )}
                     </div>
                   </div>

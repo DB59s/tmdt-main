@@ -4,6 +4,9 @@ import Link from "next/link"
 import { useState, useEffect } from "react"
 import { useRouter } from 'next/navigation'
 import { toast } from 'react-toastify'
+import MomoPaymentModal from '@/components/modals/MomoPaymentModal'
+import UsdtPaymentModal from '@/components/modals/UsdtPaymentModal'
+import SolanaPaymentModal from '@/components/modals/SolanaPaymentModal'
 
 export default function Checkout() {
     const router = useRouter()
@@ -27,6 +30,21 @@ export default function Checkout() {
     const [discountAmount, setDiscountAmount] = useState(0)
     const [discountError, setDiscountError] = useState('')
     
+    // Thêm state cho Momo payment
+    const [showMomoModal, setShowMomoModal] = useState(false)
+    const [momoPaymentData, setMomoPaymentData] = useState(null)
+    const [orderId, setOrderId] = useState(null)
+    const [checkingPayment, setCheckingPayment] = useState(false)
+    const [paymentPollingInterval, setPaymentPollingInterval] = useState(null)
+    
+    // Thêm state cho USDT payment
+    const [showUsdtModal, setShowUsdtModal] = useState(false)
+    const [usdtPaymentData, setUsdtPaymentData] = useState(null)
+    
+    // Thêm state cho Solana payment
+    const [showSolanaModal, setShowSolanaModal] = useState(false)
+    const [solanaPaymentData, setSolanaPaymentData] = useState(null)
+    
     // Billing form state - adjusted to match backend requirements
     const [formData, setFormData] = useState({
         firstName: '',
@@ -43,7 +61,6 @@ export default function Checkout() {
 
     // Order states
     const [orderSuccess, setOrderSuccess] = useState(false)
-    const [orderId, setOrderId] = useState(null)
 
     useEffect(() => {
         fetchCart()
@@ -171,6 +188,199 @@ export default function Checkout() {
         return true
     }
 
+    // Thêm hàm tạo mã QR Momo
+    const generateMomoQR = async (orderId) => {
+        try {
+            setCheckingPayment(true)
+            
+            const response = await fetch(`${process.env.domainApi}/api/customer/payment/momo/generate-qr`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ orderId })
+            })
+            
+            const data = await response.json()
+            
+            if (!response.ok || !data.success) {
+                toast.error(data.message || 'Không thể tạo mã QR Momo')
+                setCheckingPayment(false)
+                return false
+            }
+            
+            // Lưu thông tin thanh toán Momo
+            setMomoPaymentData(data.data)
+            
+            // Hiển thị modal thanh toán Momo
+            setShowMomoModal(true)
+            
+            // Bắt đầu kiểm tra trạng thái thanh toán
+            startPaymentStatusPolling(orderId)
+            
+            setCheckingPayment(false)
+            return true
+        } catch (error) {
+            console.error('Error generating Momo QR:', error)
+            toast.error('Đã xảy ra lỗi khi tạo mã QR Momo')
+            setCheckingPayment(false)
+            return false
+        }
+    }
+    
+    // Thêm hàm tạo thông tin thanh toán USDT
+    const generateUsdtPayment = async (orderId) => {
+        try {
+            setCheckingPayment(true)
+            
+            const response = await fetch(`${process.env.domainApi}/api/customer/payment/usdt/create-payment`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ orderId })
+            })
+            
+            const data = await response.json()
+            
+            if (!response.ok || !data.success) {
+                toast.error(data.message || 'Không thể tạo thông tin thanh toán USDT')
+                setCheckingPayment(false)
+                return false
+            }
+            
+            // Lưu thông tin thanh toán USDT
+            setUsdtPaymentData(data.data)
+            
+            // Hiển thị modal thanh toán USDT
+            setShowUsdtModal(true)
+            
+            // Bắt đầu kiểm tra trạng thái thanh toán
+            startPaymentStatusPolling(orderId)
+            
+            setCheckingPayment(false)
+            return true
+        } catch (error) {
+            console.error('Error generating USDT payment info:', error)
+            toast.error('Đã xảy ra lỗi khi tạo thông tin thanh toán USDT')
+            setCheckingPayment(false)
+            return false
+        }
+    }
+    
+    // Thêm hàm tạo thông tin thanh toán Solana
+    const generateSolanaPayment = async (orderId) => {
+        try {
+            setCheckingPayment(true)
+            
+            const response = await fetch(`${process.env.domainApi}/api/customer/payment/solana/create-payment`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ orderId })
+            })
+            
+            const data = await response.json()
+            
+            if (!response.ok || !data.success) {
+                toast.error(data.message || 'Không thể tạo thông tin thanh toán Solana')
+                setCheckingPayment(false)
+                return false
+            }
+            
+            // Lưu thông tin thanh toán Solana
+            setSolanaPaymentData(data.data)
+            
+            // Hiển thị modal thanh toán Solana
+            setShowSolanaModal(true)
+            
+            // Bắt đầu kiểm tra trạng thái thanh toán
+            startPaymentStatusPolling(orderId)
+            
+            setCheckingPayment(false)
+            return true
+        } catch (error) {
+            console.error('Error generating Solana payment info:', error)
+            toast.error('Đã xảy ra lỗi khi tạo thông tin thanh toán Solana')
+            setCheckingPayment(false)
+            return false
+        }
+    }
+    
+    // Cập nhật hàm kiểm tra trạng thái thanh toán
+    const checkPaymentStatus = async (orderId) => {
+        try {
+            setCheckingPayment(true)
+            
+            // Gọi API kiểm tra trạng thái thanh toán
+            const response = await fetch(`${process.env.domainApi}/api/customer/payment/check-status/${orderId}`)
+            const data = await response.json()
+            
+            if (response.ok && data.success) {
+                // Nếu đã thanh toán, đóng modal và chuyển hướng
+                if (data.data.paymentStatus === 'Đã thanh toán') {
+                    stopPaymentStatusPolling()
+                    setShowMomoModal(false)
+                    toast.success('Thanh toán đơn hàng thành công!')
+                    
+                    // Xóa giỏ hàng
+                    await clearCart()
+                    
+                    // Chuyển hướng đến trang theo dõi đơn hàng
+                    router.push(`/order-tracking?id=${orderId}`)
+                }
+            }
+        } catch (error) {
+            console.error('Error checking payment status:', error)
+        } finally {
+            setCheckingPayment(false)
+        }
+    }
+
+    // Hàm xóa giỏ hàng
+    const clearCart = async () => {
+        try {
+            const customerId = localStorage.getItem('customerId')
+            if (customerId) {
+                await fetch(`${process.env.domainApi}/api/customer/cart/${customerId}`, {
+                    method: 'DELETE'
+                })
+            }
+        } catch (error) {
+            console.error('Error clearing cart:', error)
+        }
+    }
+    
+    // Thêm hàm bắt đầu kiểm tra trạng thái thanh toán
+    const startPaymentStatusPolling = (orderId) => {
+        // Kiểm tra ngay lập tức
+        checkPaymentStatus(orderId)
+        
+        // Sau đó kiểm tra mỗi 5 giây
+        const interval = setInterval(() => {
+            checkPaymentStatus(orderId)
+        }, 5000)
+        
+        setPaymentPollingInterval(interval)
+    }
+    
+    // Thêm hàm dừng kiểm tra trạng thái thanh toán
+    const stopPaymentStatusPolling = () => {
+        if (paymentPollingInterval) {
+            clearInterval(paymentPollingInterval)
+            setPaymentPollingInterval(null)
+        }
+    }
+    
+    // Xóa interval khi component unmount
+    useEffect(() => {
+        return () => {
+            stopPaymentStatusPolling()
+        }
+    }, [paymentPollingInterval])
+
+    // Điều chỉnh lại hàm handleSubmitOrder để tách biệt xử lý thanh toán Momo
     const handleSubmitOrder = async (e) => {
         e.preventDefault()
 
@@ -184,20 +394,22 @@ export default function Checkout() {
             setLoading(true)
             
             if (!cart || !cart.items || cart.items.length === 0) {
-                toast.error('Your cart is empty')
+                toast.error('Giỏ hàng của bạn đang trống')
                 return
             }
             
-            // Prepare order data with fields exactly matching backend expectations
+            // Chuẩn bị dữ liệu đơn hàng
             const orderItems = cart.items.map(item => ({
                 productId: item.productId._id || item.productId,
                 quantity: item.quantity,
-                price: item.price
+                price: item.price,
+                priceBeforeSale: item.priceBeforeSale,
+                onSale: item.onSale
             }))
             
             const totalAmount = calculateTotal()
 
-            // Prepare full shipping address correctly formatted
+            // Tạo địa chỉ giao hàng đầy đủ
             const fullAddress = [
                 formData.address,
                 formData.apartment && formData.apartment.trim() ? formData.apartment : '',
@@ -206,21 +418,33 @@ export default function Checkout() {
                 formData.postcode
             ].filter(Boolean).join(', ');
             
+            // Ánh xạ phương thức thanh toán theo backend
+            let mappedPaymentMethod = 'Thanh toán khi nhận hàng'
+            
+            if (paymentMethod === 'momo') {
+                mappedPaymentMethod = 'Thanh toán qua Momo'
+            } else if (paymentMethod === 'usdt') {
+                mappedPaymentMethod = 'Thanh toán qua USDT'
+            } else if (paymentMethod === 'solana') {
+                mappedPaymentMethod = 'Thanh toán qua Solana'
+            }
+            
             const orderData = {
                 customerName: `${formData.firstName} ${formData.lastName}`.trim(),
                 customerPhone: formData.phone,
                 customerEmail: formData.email,
                 shippingAddress: fullAddress,
                 customerId: customerId,
-                status: 'Đang xác nhận', // Default status as specified
+                status: 'Đang xác nhận',
                 totalAmount,
-                paymentMethod: paymentMethod === 'cod' ? 'Thanh toán khi nhận hàng' : 'Chuyển khoản qua ngân hàng',
-                paymentStatus: 'Chưa thanh toán', // Default payment status as specified
+                paymentMethod: mappedPaymentMethod,
+                paymentStatus: 'Chưa thanh toán',
                 items: orderItems,
                 discountCode: discountApplied ? discountCode : undefined,
                 orderNotes: formData.orderNotes || ''
             }
             
+            // Gọi API tạo đơn hàng
             const response = await fetch(`${process.env.domainApi}/api/customer/orders`, {
                 method: 'POST',
                 headers: {
@@ -231,34 +455,64 @@ export default function Checkout() {
             
             const data = await response.json()
             
-            if (response.ok) {
-                setOrderSuccess(true)
-                setOrderId(data.order._id)
+            if (!response.ok) {
+                toast.error(data.message || 'Không thể tạo đơn hàng. Vui lòng thử lại.')
+                return
+            }
+            
+            // Lưu ID đơn hàng và thông tin khách hàng
+            const newOrderId = data.order._id
+            const orderCode = data.order.orderId
+            setOrderId(newOrderId)
+            
+            localStorage.setItem('customerName', orderData.customerName)
+            localStorage.setItem('customerEmail', orderData.customerEmail)
+            
+            // Xử lý theo phương thức thanh toán
+            if (paymentMethod === 'momo') {
+                // Tạo QR Momo và hiển thị modal thanh toán
+                const momoSuccess = await generateMomoQR(orderCode)
                 
-                // Save customer information to localStorage for future use
-                localStorage.setItem('customerName', orderData.customerName)
-                localStorage.setItem('customerEmail', orderData.customerEmail)
-                
-                // Clear customer cart
-                const customerId = localStorage.getItem('customerId')
-                if (customerId) {
-                    await fetch(`${process.env.domainApi}/api/customer/cart/${customerId}`, {
-                        method: 'DELETE'
-                    })
+                if (!momoSuccess) {
+                    // Nếu không thể tạo QR, vẫn chuyển hướng đến trang đơn hàng
+                    toast.warning('Không thể tạo mã QR Momo, nhưng đơn hàng của bạn đã được ghi nhận.')
+                    router.push(`/order-tracking?id=${newOrderId}`)
                 }
+            } else if (paymentMethod === 'usdt') {
+                // Tạo thông tin thanh toán USDT và hiển thị modal
+                const usdtSuccess = await generateUsdtPayment(orderCode)
                 
-                toast.success('Your order has been placed successfully!')
+                if (!usdtSuccess) {
+                    // Nếu không thể tạo thông tin thanh toán, vẫn chuyển hướng đến trang đơn hàng
+                    toast.warning('Không thể tạo thông tin thanh toán USDT, nhưng đơn hàng của bạn đã được ghi nhận.')
+                    router.push(`/order-tracking?id=${newOrderId}`)
+                }
+            } else if (paymentMethod === 'solana') {
+                // Tạo thông tin thanh toán Solana và hiển thị modal
+                const solanaSuccess = await generateSolanaPayment(orderCode)
                 
-                // Redirect to order confirmation page after a delay
-                setTimeout(() => {
-                    router.push(`/order-tracking?id=${data.order._id}`)
-                }, 2000)
+                if (!solanaSuccess) {
+                    // Nếu không thể tạo thông tin thanh toán, vẫn chuyển hướng đến trang đơn hàng
+                    toast.warning('Không thể tạo thông tin thanh toán Solana, nhưng đơn hàng của bạn đã được ghi nhận.')
+                    router.push(`/order-tracking?id=${newOrderId}`)
+                }
             } else {
-                toast.error(data.message || 'Failed to place order')
+                // Với các phương thức thanh toán khác
+                setOrderSuccess(true)
+                
+                // Xóa giỏ hàng
+                await clearCart()
+                
+                toast.success('Đơn hàng của bạn đã được đặt thành công!')
+                
+                // Chuyển hướng sau 2 giây
+                setTimeout(() => {
+                    router.push(`/order-tracking?id=${newOrderId}`)
+                }, 2000)
             }
         } catch (error) {
             console.error('Error placing order:', error)
-            toast.error('Failed to place order. Please try again.')
+            toast.error('Đã xảy ra lỗi khi đặt hàng. Vui lòng thử lại.')
         } finally {
             setLoading(false)
         }
@@ -287,10 +541,9 @@ export default function Checkout() {
     // Thêm hàm trợ giúp để kiểm tra và định dạng giá trị tiền
     const formatCurrency = (amount) => {
         // Đảm bảo amount là một số
-
-
         const numericAmount = Number(amount) || 0;
-        return numericAmount.toFixed(2);
+        // Định dạng tiền Việt Nam đồng
+        return numericAmount.toLocaleString('vi-VN') + ' ₫';
     };
 
     if (orderSuccess) {
@@ -333,37 +586,7 @@ export default function Checkout() {
                     <section className="coupon-area pt-80 pb-30 wow fadeInUp" data-wow-duration=".8s" data-wow-delay=".2s">
                         <div className="container">
                             <div className="row">
-                                <div className="col-md-6">
-                                    <div className="coupon-accordion">
-                                        <h3>Returning customer? <span id="showlogin" onClick={handleLoginToggle}>Click here to login</span></h3>
-                                        <div id="checkout-login" className="coupon-content" style={{ display: `${isLoginToggle ? "block" : "none"}` }}>
-                                            <div className="coupon-info">
-                                                <p className="coupon-text">Login to your account to access your saved addresses and speed up checkout.</p>
-                                                <form action="#">
-                                                    <p className="form-row-first">
-                                                        <label>Email <span className="required">*</span></label>
-                                                        <input type="text" />
-                                                    </p>
-                                                    <p className="form-row-last">
-                                                        <label>Password <span className="required">*</span></label>
-                                                        <input type="password" />
-                                                    </p>
-                                                    <p className="form-row">
-                                                        <button className="tp-btn tp-color-btn" type="button">Login</button>
-                                                        <label>
-                                                            <input type="checkbox" />
-                                                            Remember me
-                                                        </label>
-                                                    </p>
-                                                    <p className="lost-password">
-                                                        <Link href="/auth/login">Lost your password?</Link>
-                                                    </p>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-md-6">
+                                <div className="">
                                     <div className="coupon-accordion">
                                         <h3>Have a discount code? <span id="showcoupon" onClick={handleCuponToggle}>Click here to enter your code</span></h3>
                                         <div id="checkout_coupon" className="coupon-checkout-content" style={{ display: `${isCuponToggle ? "block" : "none"}` }}>
@@ -392,7 +615,7 @@ export default function Checkout() {
                                                     )}
                                                     {discountApplied && (
                                                         <p className="text-success mt-2 mb-0">
-                                                            Discount of ${formatCurrency(discountAmount)} applied successfully!
+                                                            Giảm giá {formatCurrency(discountAmount)} đã được áp dụng!
                                                         </p>
                                                     )}
                                                 </form>
@@ -567,7 +790,7 @@ export default function Checkout() {
                                                                         </td>
                                                                         <td className="product-total">
                                                                             <span className="amount">
-                                                                                ${((item.onSale ? item.price : (item.priceBeforeSale || item.price)) * item.quantity).toFixed(2)}
+                                                                                {formatCurrency((item.onSale ? item.price : (item.priceBeforeSale || item.price)) * item.quantity)}
                                                                             </span>
                                                                         </td>
                                                                     </tr>
@@ -575,18 +798,18 @@ export default function Checkout() {
                                                             </tbody>
                                                             <tfoot>
                                                                 <tr className="cart-subtotal">
-                                                                    <th>Cart Subtotal</th>
-                                                                    <td><span className="amount">${formatCurrency(calculateSubtotal())}</span></td>
+                                                                    <th>Tổng giỏ hàng</th>
+                                                                    <td><span className="amount">{formatCurrency(calculateSubtotal())}</span></td>
                                                                 </tr>
                                                                 {discountApplied && (
                                                                     <tr className="cart-discount">
-                                                                        <th>Discount</th>
-                                                                        <td><span className="amount">-${formatCurrency(discountAmount)}</span></td>
+                                                                        <th>Giảm giá</th>
+                                                                        <td><span className="amount">-{formatCurrency(discountAmount)}</span></td>
                                                                     </tr>
                                                                 )}
                                                                 <tr className="order-total">
-                                                                    <th>Order Total</th>
-                                                                    <td><strong><span className="amount">${formatCurrency(calculateTotal())}</span></strong></td>
+                                                                    <th>Tổng đơn hàng</th>
+                                                                    <td><strong><span className="amount">{formatCurrency(calculateTotal())}</span></strong></td>
                                                                 </tr>
                                                             </tfoot>
                                                         </table>
@@ -610,25 +833,119 @@ export default function Checkout() {
                                                             <div className="payment-option mb-15">
                                                                 <input 
                                                                     type="radio" 
-                                                                    id="payment-bank" 
+                                                                    id="payment-usdt" 
                                                                     name="payment-method" 
-                                                                    checked={paymentMethod === 'bank'}
-                                                                    onChange={() => setPaymentMethod('bank')}
+                                                                    checked={paymentMethod === 'usdt'}
+                                                                    onChange={() => setPaymentMethod('usdt')}
                                                                 />
-                                                                <label htmlFor="payment-bank">
-                                                                    <span className="payment-option-title">Bank Transfer</span>
-                                                                    <span className="payment-option-desc">Make your payment directly to our bank account.</span>
+                                                                <label htmlFor="payment-usdt">
+                                                                    <span className="payment-option-title">
+                                                                        <img 
+                                                                            src="/assets/img/payment/usdt-logo.png" 
+                                                                            alt="USDT" 
+                                                                            style={{ 
+                                                                                height: '20px', 
+                                                                                marginRight: '8px',
+                                                                                verticalAlign: 'middle' 
+                                                                            }} 
+                                                                        />
+                                                                        Thanh toán qua USDT (TRC20)
+                                                                    </span>
+                                                                    <span className="payment-option-desc">Chuyển USDT qua mạng TRC20 để thanh toán.</span>
                                                                 </label>
                                                             </div>
                                                             
-                                                            {paymentMethod === 'bank' && (
-                                                                <div className="bank-info mt-15 p-4 bg-light rounded">
-                                                                    <h5>Bank Account Details</h5>
-                                                                    <p>Please use your Order ID as the payment reference.</p>
-                                                                    <p className="mb-10">Your order won't be shipped until the funds have cleared in our account.</p>
-                                                                    <div className="qr-code text-center my-15">
-                                                                        <img src="/qr_image.jpg" alt="QR Code for payment" style={{ maxWidth: '200px' }} />
-                                                                        <p className="mt-10"><strong>Scan to pay</strong></p>
+                                                            <div className="payment-option mb-15">
+                                                                <input 
+                                                                    type="radio" 
+                                                                    id="payment-solana" 
+                                                                    name="payment-method" 
+                                                                    checked={paymentMethod === 'solana'}
+                                                                    onChange={() => setPaymentMethod('solana')}
+                                                                />
+                                                                <label htmlFor="payment-solana">
+                                                                    <span className="payment-option-title">
+                                                                        <img 
+                                                                            src="/assets/img/payment/solana-logo.png" 
+                                                                            alt="Solana" 
+                                                                            style={{ 
+                                                                                height: '20px', 
+                                                                                marginRight: '8px',
+                                                                                verticalAlign: 'middle' 
+                                                                            }} 
+                                                                        />
+                                                                        Thanh toán qua Solana Pay
+                                                                    </span>
+                                                                    <span className="payment-option-desc">Thanh toán nhanh chóng và an toàn với Solana Pay.</span>
+                                                                </label>
+                                                            </div>
+                                                            
+                                                            <div className="payment-option mb-15">
+                                                                <input 
+                                                                    type="radio" 
+                                                                    id="payment-momo" 
+                                                                    name="payment-method" 
+                                                                    checked={paymentMethod === 'momo'}
+                                                                    onChange={() => setPaymentMethod('momo')}
+                                                                />
+                                                                <label htmlFor="payment-momo">
+                                                                    <span className="payment-option-title">
+                                                                        <img 
+                                                                            src="/assets/img/payment/momo-logo.png" 
+                                                                            alt="Momo" 
+                                                                            style={{ 
+                                                                                height: '20px', 
+                                                                                marginRight: '8px',
+                                                                                verticalAlign: 'middle' 
+                                                                            }} 
+                                                                        />
+                                                                        Thanh toán qua Momo
+                                                                    </span>
+                                                                    <span className="payment-option-desc">Quét mã QR hoặc mở app Momo để thanh toán.</span>
+                                                                </label>
+                                                            </div>
+                                                            
+                                                            {paymentMethod === 'usdt' && (
+                                                                <div className="usdt-info mt-15 p-4 bg-light rounded">
+                                                                    <h5>Thanh toán qua USDT (TRC20)</h5>
+                                                                    <p>Sau khi đặt hàng, bạn sẽ được chuyển đến trang thanh toán USDT với thông tin chi tiết.</p>
+                                                                    <p>Sử dụng ví tiền điện tử hỗ trợ USDT trên mạng TRC20 để thanh toán.</p>
+                                                                    <div className="text-center my-15">
+                                                                        <img 
+                                                                            src="/assets/img/payment/usdt-logo.png" 
+                                                                            alt="USDT Payment" 
+                                                                            style={{ maxWidth: '100px' }} 
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                            
+                                                            {paymentMethod === 'solana' && (
+                                                                <div className="solana-info mt-15 p-4 bg-light rounded">
+                                                                    <h5>Thanh toán qua Solana Pay</h5>
+                                                                    <p>Sau khi đặt hàng, bạn sẽ được chuyển đến trang thanh toán Solana với mã QR.</p>
+                                                                    <p>Sử dụng ví Solana để quét mã QR hoặc mở URL thanh toán và hoàn tất giao dịch.</p>
+                                                                    <div className="text-center my-15">
+                                                                        <img 
+                                                                            src="/assets/img/payment/solana-logo.png" 
+                                                                            alt="Solana Payment" 
+                                                                            style={{ maxWidth: '100px' }} 
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                            
+                                                            {paymentMethod === 'momo' && (
+                                                                <div className="momo-info mt-15 p-4 bg-light rounded">
+                                                                    <h5>Thanh toán qua Momo</h5>
+                                                                    <p>Sau khi đặt hàng, bạn sẽ được chuyển đến trang thanh toán Momo với mã QR.</p>
+                                                                    <p>Sử dụng ứng dụng Momo để quét mã QR và hoàn tất thanh toán.</p>
+                                                                    <div className="text-center my-15">
+                                                                        <img 
+                                                                            src="/assets/img/payment/momo-logo.png" 
+                                                                            alt="Momo Payment" 
+                                                                            style={{ maxWidth: '100px' }} 
+                                                                        />
                                                                     </div>
                                                                 </div>
                                                             )}
@@ -654,6 +971,48 @@ export default function Checkout() {
                     </section>
                 </div>
             </Layout>
+            
+            {/* Momo Payment Modal */}
+            {showMomoModal && momoPaymentData && (
+                <MomoPaymentModal
+                    show={showMomoModal}
+                    handleClose={() => {
+                        setShowMomoModal(false)
+                        stopPaymentStatusPolling()
+                        router.push(`/order-tracking?id=${orderId}`)
+                    }}
+                    paymentData={momoPaymentData}
+                    checkingPayment={checkingPayment}
+                />
+            )}
+            
+            {/* USDT Payment Modal */}
+            {showUsdtModal && usdtPaymentData && (
+                <UsdtPaymentModal
+                    show={showUsdtModal}
+                    handleClose={() => {
+                        setShowUsdtModal(false)
+                        stopPaymentStatusPolling()
+                        router.push(`/order-tracking?id=${orderId}`)
+                    }}
+                    paymentData={usdtPaymentData}
+                    checkingPayment={checkingPayment}
+                />
+            )}
+            
+            {/* Solana Payment Modal */}
+            {showSolanaModal && solanaPaymentData && (
+                <SolanaPaymentModal
+                    show={showSolanaModal}
+                    handleClose={() => {
+                        setShowSolanaModal(false)
+                        stopPaymentStatusPolling()
+                        router.push(`/order-tracking?id=${orderId}`)
+                    }}
+                    paymentData={solanaPaymentData}
+                    checkingPayment={checkingPayment}
+                />
+            )}
         </>
     )
 }

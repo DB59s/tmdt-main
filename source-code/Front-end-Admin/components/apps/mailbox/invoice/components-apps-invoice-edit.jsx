@@ -6,9 +6,10 @@ import IconSend from '@/components/icon/icon-send';
 import IconX from '@/components/icon/icon-x';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
+import { formatCurrency } from '@/utils/format';
 
 const ComponentsAppsInvoiceEdit = () => {
-    const currencyList = ['USD - US Dollar', 'GBP - British Pound', 'IDR - Indonesian Rupiah', 'INR - Indian Rupee', 'BRL - Brazilian Real', 'EUR - Germany (Euro)', 'TRY - Turkish Lira'];
+    const currencyList = ['VND - Vietnamese Dong', 'USD - US Dollar', 'GBP - British Pound', 'IDR - Indonesian Rupiah', 'INR - Indian Rupee', 'BRL - Brazilian Real', 'EUR - Germany (Euro)', 'TRY - Turkish Lira'];
     const [tax, setTax] = useState(0);
     const [discount, setDiscount] = useState(0);
     const [shippingCharge, setShippingCharge] = useState(0);
@@ -32,7 +33,7 @@ const ComponentsAppsInvoiceEdit = () => {
             isTax: false,
         },
     ]);
-    const [selectedCurrency, setSelectedCurrency] = useState('USD - US Dollar');
+    const [selectedCurrency, setSelectedCurrency] = useState('VND - Vietnamese Dong');
     const [params, setParams] = useState({
         title: 'Tailwind',
         invoiceNo: '#0001',
@@ -615,7 +616,7 @@ const ComponentsAppsInvoiceEdit = () => {
                         </div>
                     </div>
                     <div className="mt-4">
-                        <label htmlFor="shipping-charge">Shipping Charge($) </label>
+                        <label htmlFor="shipping-charge">Shipping Charge </label>
                         <input
                             id="shipping-charge"
                             type="number"

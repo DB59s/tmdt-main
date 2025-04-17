@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import axios from 'axios';
+import { formatCurrency } from '@/utils/format';
 
 const ProductPriceCalculator = () => {
     const apiUrl = process.env.domainApi;
@@ -115,9 +116,9 @@ const ProductPriceCalculator = () => {
                 {previewResult && (
                     <div className="mb-4 p-3 bg-gray-50 rounded-md">
                         <h6 className="text-sm font-medium mb-2">Preview Calculation:</h6>
-                        <p className="text-sm">Original Price: <span className="font-semibold">${previewResult.priceBeforeSale.toFixed(2)}</span></p>
+                        <p className="text-sm">Original Price: <span className="font-semibold">{formatCurrency(previewResult.priceBeforeSale)}</span></p>
                         <p className="text-sm">Discount: <span className="font-semibold">{previewResult.discountPercentage}%</span></p>
-                        <p className="text-sm">Current Price: <span className="font-semibold">${previewResult.price.toFixed(2)}</span></p>
+                        <p className="text-sm">Current Price: <span className="font-semibold">{formatCurrency(previewResult.price)}</span></p>
                     </div>
                 )}
                 
@@ -136,7 +137,7 @@ const ProductPriceCalculator = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="p-3 bg-white rounded-md shadow-sm">
                             <p className="text-sm text-gray-500">Original Price</p>
-                            <p className="text-lg font-bold">${result.priceBeforeSale.toFixed(2)}</p>
+                            <p className="text-lg font-bold">{formatCurrency(result.priceBeforeSale)}</p>
                         </div>
                         <div className="p-3 bg-white rounded-md shadow-sm">
                             <p className="text-sm text-gray-500">Discount</p>
@@ -144,7 +145,7 @@ const ProductPriceCalculator = () => {
                         </div>
                         <div className="p-3 bg-white rounded-md shadow-sm">
                             <p className="text-sm text-gray-500">Current Price</p>
-                            <p className="text-lg font-bold">${result.price.toFixed(2)}</p>
+                            <p className="text-lg font-bold">{formatCurrency(result.price)}</p>
                         </div>
                     </div>
                 </div>

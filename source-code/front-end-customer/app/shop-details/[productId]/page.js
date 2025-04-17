@@ -309,6 +309,12 @@ const ProductDetailsPage = () => {
     }
   }
   
+  // Format currency to VND
+  const formatCurrency = (amount) => {
+    const numAmount = Number(amount) || 0
+    return numAmount.toLocaleString('vi-VN') + ' ₫'
+  }
+  
   if (loading) {
     return (
       <Layout headerStyle={3} footerStyle={1} breadcrumbTitle="Product Details">
@@ -412,11 +418,11 @@ const ProductDetailsPage = () => {
                     <div className="tpproduct-details__price mb-30">
                       {product.onSale ? (
                         <>
-                          <del>${(product.priceBeforeSale || 0).toFixed(2)}</del>
-                          <span>${(product.price || 0).toFixed(2)}</span>
+                          <del>{formatCurrency(product.priceBeforeSale || 0)}</del>
+                          <span>{formatCurrency(product.price || 0)}</span>
                         </>
                       ) : (
-                        <span>${(product.priceBeforeSale || product.price || 0).toFixed(2)}</span>
+                        <span>{formatCurrency(product.priceBeforeSale || product.price || 0)}</span>
                       )}
                     </div>
                     <div className="tpproduct-details__pera">

@@ -244,139 +244,239 @@ const ProductList = ({
           </div>
         ) : (
           <div className="product-list-view">
-            {products.map((product) => (
-              <div key={product._id || product.id} className="product-list-item mb-30" style={{
-                border: "1px solid #e9e9e9",
-                borderRadius: "8px",
-                overflow: "hidden",
-                transition: "box-shadow 0.3s ease",
-                backgroundColor: "#fff",
-                boxShadow: "0 2px 10px rgba(0,0,0,0.03)"
-              }}>
-                <div className="row align-items-center">
-                  <div className="col-lg-4">
-                    <div className="product-list-img" style={{ position: "relative", padding: "20px" }}>
-                      <Link href={`/shop-details/${product._id || product.id}`}>
-                        <img 
-                          src={product.images && product.images.length > 0 
-                            ? product.images[0] 
-                            : "/assets/img/product/placeholder.jpg"} 
-                          alt={product.title || product.name} 
-                          className="img-fluid"
-                          style={{ 
-                            height: "220px", 
-                            width: "100%", 
-                            objectFit: "contain",
-                            transition: "transform 0.3s ease" 
-                          }}
-                        />
-                      </Link>
-                      {product.onSale && (
-                        <div 
-                          style={{ 
-                            position: "absolute", 
-                            top: "15px", 
-                            left: "15px", 
-                            backgroundColor: "#ff4a17", 
-                            color: "white", 
-                            padding: "4px 10px", 
-                            borderRadius: "4px",
-                            fontSize: "12px",
-                            fontWeight: "600",
-                            boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
-                          }}
-                        >
-                          {product.priceBeforeSale && product.price ? 
-                            `-${Math.round((1 - product.price / product.priceBeforeSale) * 100)}%` : 
-                            'SALE'}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="col-lg-8">
-                    <div className="product-list-content" style={{ padding: "25px" }}>
-                      <h4 style={{ 
-                        fontSize: "20px", 
-                        fontWeight: "600", 
-                        marginBottom: "12px",
-                        lineHeight: "1.4",
-                      }}>
-                        <Link href={`/shop-details/${product._id || product.id}`} style={{ color: "#333", transition: "color 0.3s ease" }}>
-                          {product.title || product.name}
+            {products.map((product) => {
+              const [hovered, setHovered] = useState(false);
+              const [loading, setLoading] = useState(false);
+              
+              const handleAddToCartInList = async () => {
+                setLoading(true);
+                try {
+                  await handleAddToCart(product._id || product.id);
+                } finally {
+                  setLoading(false);
+                }
+              };
+              
+              return (
+                <div 
+                  key={product._id || product.id} 
+                  className="product-list-item mb-30" 
+                  style={{
+                    border: "1px solid #e9e9e9",
+                    borderRadius: "12px",
+                    overflow: "hidden",
+                    transition: "all 0.4s ease",
+                    backgroundColor: "#fff",
+                    boxShadow: hovered ? "0 10px 30px rgba(0,0,0,0.1)" : "0 2px 10px rgba(0,0,0,0.03)",
+                    transform: hovered ? "translateY(-5px)" : "none"
+                  }}
+                  onMouseEnter={() => setHovered(true)}
+                  onMouseLeave={() => setHovered(false)}
+                >
+                  <div className="row align-items-center">
+                    <div className="col-lg-4">
+                      <div className="product-list-img" style={{ position: "relative", padding: "20px" }}>
+                        <Link href={`/shop-details/${product._id || product.id}`}>
+                          <div style={{ position: "relative", paddingBottom: "80%", overflow: "hidden" }}>
+                            <img 
+                              src={product.images && product.images.length > 0 
+                                ? product.images[0] 
+                                : "/assets/img/product/placeholder.jpg"} 
+                              alt={product.title || product.name} 
+                              className="img-fluid"
+                              style={{ 
+                                position: "absolute",
+                                top: "0",
+                                left: "0",
+                                height: "100%", 
+                                width: "100%", 
+                                objectFit: "contain",
+                                transition: "transform 0.5s ease",
+                                transform: hovered ? "scale(1.05)" : "scale(1)"
+                              }}
+                            />
+                          </div>
                         </Link>
-                      </h4>
-                      <div className="product-price mb-10">
-                        {product.onSale ? (
-                          <>
-                            <del style={{ color: "#999", marginRight: "10px", fontSize: "16px" }}>${(product.priceBeforeSale || 0).toFixed(2)}</del>
-                            <span style={{ color: "#ff4a17", fontWeight: "700", fontSize: "20px" }}>${(product.price || 0).toFixed(2)}</span>
-                          </>
-                        ) : (
-                          <span style={{ color: "#333", fontWeight: "700", fontSize: "20px" }}>${(product.priceBeforeSale || product.price || 0).toFixed(2)}</span>
+                        {product.onSale && (
+                          <div 
+                            style={{ 
+                              position: "absolute", 
+                              top: "20px", 
+                              left: "20px", 
+                              backgroundColor: "#ff4a17", 
+                              color: "white", 
+                              padding: "5px 12px", 
+                              borderRadius: "30px",
+                              fontSize: "12px",
+                              fontWeight: "700",
+                              boxShadow: "0 3px 8px rgba(255,74,23,0.3)",
+                              zIndex: "2",
+                              letterSpacing: "0.5px"
+                            }}
+                          >
+                            {product.priceBeforeSale && product.price ? 
+                              `-${Math.round((1 - product.price / product.priceBeforeSale) * 100)}%` : 
+                              'SALE'}
+                          </div>
                         )}
                       </div>
-                      {product.reviews && product.reviews.length > 0 && (
-                        <div className="product-rating mb-10" style={{ display: "flex", alignItems: "center" }}>
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <i 
-                              key={star} 
-                              className={`fa fa-star${star <= (product.averageRating || 0) ? '' : '-o'}`}
-                              style={{ color: "#FFC107", fontSize: "14px", marginRight: "2px" }}
-                            ></i>
-                          ))}
-                          <span style={{ color: "#777", fontSize: "14px", marginLeft: "5px" }}>({product.reviews.length})</span>
+                    </div>
+                    <div className="col-lg-8">
+                      <div className="product-list-content" style={{ padding: "25px" }}>
+                        <h4 style={{ 
+                          fontSize: "22px", 
+                          fontWeight: "600", 
+                          marginBottom: "15px",
+                          lineHeight: "1.4",
+                          transition: "color 0.3s ease"
+                        }}>
+                          <Link href={`/shop-details/${product._id || product.id}`} style={{ 
+                            color: hovered ? "#ff4a17" : "#333", 
+                            transition: "color 0.3s ease",
+                            textDecoration: "none"
+                          }}>
+                            {product.title || product.name}
+                          </Link>
+                        </h4>
+                        <div className="product-price mb-15" style={{ 
+                          display: "flex", 
+                          alignItems: "center",
+                          fontFamily: "'Poppins', sans-serif"
+                        }}>
+                          {product.onSale ? (
+                            <>
+                              <del style={{ 
+                                color: "#999", 
+                                marginRight: "12px", 
+                                fontSize: "16px"
+                              }}>
+                                ${(product.priceBeforeSale || 0).toFixed(2)}
+                              </del>
+                              <span style={{ 
+                                color: "#ff4a17", 
+                                fontWeight: "700", 
+                                fontSize: "22px"
+                              }}>
+                                ${(product.price || 0).toFixed(2)}
+                              </span>
+                            </>
+                          ) : (
+                            <span style={{ 
+                              color: "#333", 
+                              fontWeight: "700", 
+                              fontSize: "22px"
+                            }}>
+                              ${(product.priceBeforeSale || product.price || 0).toFixed(2)}
+                            </span>
+                          )}
                         </div>
-                      )}
-                      <p className="mb-15" style={{ 
-                        color: "#666", 
-                        lineHeight: "1.6", 
-                        fontSize: "14px",
-                        marginBottom: "20px"
-                      }}>
-                        {product.description?.substring(0, 150)}...
-                      </p>
-                      <div className="product-list-action">
-                        <button 
-                          type="button" 
-                          className="btn btn-sm btn-primary me-2"
-                          onClick={() => handleAddToCart(product._id || product.id)}
-                          style={{
-                            backgroundColor: "#4CAF50",
-                            border: "none",
-                            borderRadius: "4px",
-                            padding: "8px 15px",
-                            fontSize: "14px",
-                            fontWeight: "500",
-                            boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
-                            transition: "all 0.3s ease"
-                          }}
-                        >
-                          <i className="fa fa-shopping-cart me-1"></i> Add to Cart
-                        </button>
-                        <Link 
-                          href={`/shop-details/${product._id || product.id}`} 
-                          className="btn btn-sm btn-outline-primary"
-                          style={{
-                            borderColor: "#2196F3",
-                            color: "#2196F3",
-                            backgroundColor: "transparent",
-                            borderRadius: "4px",
-                            padding: "8px 15px",
-                            fontSize: "14px",
-                            fontWeight: "500",
-                            boxShadow: "0 2px 5px rgba(0,0,0,0.05)",
-                            transition: "all 0.3s ease",
-                            marginLeft: "8px"
-                          }}
-                        >
-                          <i className="fa fa-eye me-1"></i> View Details
-                        </Link>
+                        {product.reviews && product.reviews.length > 0 && (
+                          <div className="product-rating mb-15" style={{ 
+                            display: "flex", 
+                            alignItems: "center" 
+                          }}>
+                            <div style={{ 
+                              display: "flex", 
+                              color: "#FFC107", 
+                              marginRight: "10px" 
+                            }}>
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <i 
+                                  key={star} 
+                                  className={`fa fa-star${star <= (product.averageRating || 0) ? '' : '-o'}`}
+                                  style={{ fontSize: "16px", marginRight: "3px" }}
+                                ></i>
+                              ))}
+                            </div>
+                            <span style={{ 
+                              color: "#777", 
+                              fontSize: "14px"
+                            }}>
+                              ({product.reviews.length} reviews)
+                            </span>
+                          </div>
+                        )}
+                        <p className="mb-20" style={{ 
+                          color: "#666", 
+                          lineHeight: "1.7", 
+                          fontSize: "15px",
+                          maxHeight: "80px",
+                          overflow: "hidden"
+                        }}>
+                          {product.description?.substring(0, 180)}...
+                        </p>
+                        <div className="product-list-action" style={{ 
+                          display: "flex", 
+                          alignItems: "center",
+                          gap: "15px"
+                        }}>
+                          <button 
+                            type="button" 
+                            className="btn btn-primary"
+                            onClick={handleAddToCartInList}
+                            style={{
+                              backgroundColor: "#4CAF50",
+                              border: "none",
+                              borderRadius: "30px",
+                              padding: "10px 24px",
+                              fontSize: "14px",
+                              fontWeight: "600",
+                              boxShadow: "0 4px 12px rgba(76,175,80,0.2)",
+                              transition: "all 0.3s ease",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "8px"
+                            }}
+                          >
+                            <i className={`fa ${loading ? 'fa-spinner fa-spin' : 'fa-shopping-cart'}`}></i> 
+                            <span>Add to Cart</span>
+                          </button>
+                          <WishlistButton 
+                            productId={product._id || product.id}
+                            style={{
+                              backgroundColor: "#F44336",
+                              color: "white",
+                              border: "none",
+                              borderRadius: "50%",
+                              width: "42px",
+                              height: "42px",
+                              display: "inline-flex",
+                              justifyContent: "center",
+                              alignItems: "center",
+                              cursor: "pointer",
+                              transition: "all 0.3s ease",
+                              boxShadow: "0 4px 12px rgba(244,67,54,0.2)"
+                            }}
+                          />
+                          <Link 
+                            href={`/shop-details/${product._id || product.id}`} 
+                            className="btn btn-outline-primary"
+                            style={{
+                              borderColor: "#2196F3",
+                              color: "#2196F3",
+                              backgroundColor: "transparent",
+                              borderRadius: "30px",
+                              padding: "9px 24px",
+                              fontSize: "14px",
+                              fontWeight: "600",
+                              boxShadow: "0 4px 12px rgba(33,150,243,0.1)",
+                              transition: "all 0.3s ease",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "8px",
+                              textDecoration: "none"
+                            }}
+                          >
+                            <i className="fa fa-eye"></i>
+                            <span>View Details</span>
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>

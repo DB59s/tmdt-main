@@ -196,7 +196,7 @@ const MyOrders = () => {
                       <tr key={order._id}>
                         <td>{order.orderId}</td>
                         <td>{formatDate(order.createdAt)}</td>
-                        <td>${order.totalAmount.toFixed(2)}</td>
+                        <td>{order.totalAmount.toLocaleString('vi-VN')} đ</td>
                         <td>
                           <span className={`badge bg-${getStatusColor(order.status)}`}>
                             {order.status}

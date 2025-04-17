@@ -1,0 +1,17 @@
+Hướng dẫn cài đặt hình ảnh cho Momo:
+
+Vui lòng tải về các hình ảnh sau và đặt vào thư mục public/assets/img/payment:
+
+1. momo-logo.png - Logo chính thức của Momo
+   - Kích thước đề xuất: 120x40px hoặc tỷ lệ tương tự
+   - Màu chủ đạo: Hồng (#ae2070)
+
+2. momo-payment.png - Hình ảnh minh họa thanh toán Momo
+   - Kích thước đề xuất: 300x200px
+   - Nội dung: Hình ảnh minh họa ứng dụng Momo và quét mã QR
+
+Các hình ảnh này sẽ được sử dụng trong giao diện thanh toán Momo của trang web.
+
+Ngoài ra, bạn cũng có thể tạo các hình ảnh demo tạm thời bằng cách tìm kiếm "Momo Vietnam logo" và "Momo payment QR" trên Google Images.
+
+Sau khi tải về, vui lòng xóa file hướng dẫn này. 

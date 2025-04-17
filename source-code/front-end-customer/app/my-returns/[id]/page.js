@@ -258,7 +258,7 @@ const ReturnRequestDetail = () => {
                   </div>
                   <div className="row mb-3">
                     <div className="col-md-4 text-muted">Tổng tiền hoàn trả:</div>
-                    <div className="col-md-8">${returnRequest.totalRefundAmount?.toFixed(2) || '0.00'}</div>
+                    <div className="col-md-8">{returnRequest.totalRefundAmount?.toLocaleString() || '0'}đ</div>
                   </div>
                 </div>
               </div>
@@ -306,9 +306,9 @@ const ReturnRequestDetail = () => {
                               </div>
                             </td>
                             <td>{item.quantity}</td>
-                            <td>${item.price?.toFixed(2) || '0.00'}</td>
+                            <td>{item.price?.toLocaleString() || '0'}đ</td>
                             <td>{item.returnReason || '-'}</td>
-                            <td>${(item.price * item.quantity).toFixed(2)}</td>
+                            <td>{(item.price * item.quantity)?.toLocaleString() || '0'}đ</td>
                           </tr>
                         ))}
                       </tbody>

@@ -409,7 +409,7 @@ const CreateReturnRequest = () => {
                           <option value="">Chọn đơn hàng</option>
                           {orders.map(order => (
                             <option key={order._id} value={order._id}>
-                              #{order.orderId} - {new Date(order.orderDate || order.createdAt).toLocaleDateString()} - ${order.totalAmount.toFixed(2)}
+                              #{order.orderId} - {new Date(order.orderDate || order.createdAt).toLocaleDateString()} - {order.totalAmount.toLocaleString('vi-VN')}đ
                             </option>
                           ))}
                         </select>
@@ -558,7 +558,7 @@ const CreateReturnRequest = () => {
                                         </div>
                                       </div>
                                     </td>
-                                    <td>${item.price?.toFixed(2) || '0.00'}</td>
+                                    <td>{item.price?.toLocaleString('vi-VN')}đ</td>
                                     <td>{item.quantity}</td>
                                     <td>
                                       <input 
@@ -640,6 +640,21 @@ const CreateReturnRequest = () => {
                             onChange={handleRefundInfoChange}
                             required={formData.requestType === 'refund'}
                           />
+                        </div>
+
+                        <div className="col-12 mb-4">
+                          <div className="form-check">
+                            <input 
+                              type="checkbox" 
+                              className="form-check-input" 
+                              id="bankRefund"
+                              checked={formData.refundInfo.method === 'bank'}
+                              onChange={() => handleRefundInfoChange('method', 'bank')}
+                            />
+                            <label className="form-check-label" htmlFor="bankRefund">
+                              Hoàn tiền qua tài khoản ngân hàng
+                            </label>
+                          </div>
                         </div>
                       </div>
                     </div>

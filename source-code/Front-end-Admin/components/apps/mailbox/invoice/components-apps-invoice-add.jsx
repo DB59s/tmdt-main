@@ -6,9 +6,10 @@ import IconSend from '@/components/icon/icon-send';
 import IconX from '@/components/icon/icon-x';
 import Link from 'next/link';
 import React, { useState } from 'react';
+import { formatCurrency } from '@/utils/format';
 
 const ComponentsAppsInvoiceAdd = () => {
-    const currencyList = ['USD - US Dollar', 'GBP - British Pound', 'IDR - Indonesian Rupiah', 'INR - Indian Rupee', 'BRL - Brazilian Real', 'EUR - Germany (Euro)', 'TRY - Turkish Lira'];
+    const currencyList = ['VND - Vietnamese Dong', 'USD - US Dollar', 'GBP - British Pound', 'IDR - Indonesian Rupiah', 'INR - Indian Rupee', 'BRL - Brazilian Real', 'EUR - Germany (Euro)', 'TRY - Turkish Lira'];
 
     const [items, setItems] = useState([
         {
@@ -516,7 +517,7 @@ const ComponentsAppsInvoiceAdd = () => {
             <div className="mt-6 w-full xl:mt-0 xl:w-96">
                 <div className="panel mb-5">
                     <label htmlFor="currency">Currency</label>
-                    <select id="currency" name="currency" className="form-select">
+                    <select id="currency" name="currency" className="form-select" defaultValue="VND - Vietnamese Dong">
                         {currencyList.map((i) => (
                             <option key={i}>{i}</option>
                         ))}
@@ -547,7 +548,7 @@ const ComponentsAppsInvoiceAdd = () => {
                     </div>
                     <div className="mt-4">
                         <div>
-                            <label htmlFor="shipping-charge">Shipping Charge($) </label>
+                            <label htmlFor="shipping-charge">Shipping Charge </label>
                             <input
                                 id="shipping-charge"
                                 type="number"
