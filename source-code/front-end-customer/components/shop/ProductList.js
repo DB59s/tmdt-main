@@ -350,14 +350,14 @@ const ProductList = ({
                                 marginRight: "12px", 
                                 fontSize: "16px"
                               }}>
-                                ${(product.priceBeforeSale || 0).toFixed(2)}
+                                {(product.priceBeforeSale || 0).toLocaleString('vi-VN')}đ
                               </del>
                               <span style={{ 
                                 color: "#ff4a17", 
                                 fontWeight: "700", 
                                 fontSize: "22px"
                               }}>
-                                ${(product.price || 0).toFixed(2)}
+                                {(product.price || 0).toLocaleString('vi-VN')}đ
                               </span>
                             </>
                           ) : (
@@ -366,7 +366,7 @@ const ProductList = ({
                               fontWeight: "700", 
                               fontSize: "22px"
                             }}>
-                              ${(product.priceBeforeSale || product.price || 0).toFixed(2)}
+                              {(product.priceBeforeSale || product.price || 0).toLocaleString('vi-VN')}đ
                             </span>
                           )}
                         </div>

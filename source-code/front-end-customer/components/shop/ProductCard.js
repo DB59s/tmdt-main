@@ -248,26 +248,26 @@ const ProductCard = ({ product, onAddToCart }) => {
             <>
               <del style={{ 
                 color: "#999", 
-                marginRight: "10px", 
+                marginRight: "12px", 
                 fontSize: "14px"
               }}>
-                {formatCurrency(product.priceBeforeSale || 0)}
+                {formatCurrency(product.priceBeforeSale)}
               </del>
               <span style={{ 
                 color: "#ff4a17", 
-                fontWeight: "600", 
+                fontWeight: "700", 
                 fontSize: "18px"
               }}>
-                {formatCurrency(product.price || 0)}
+                {formatCurrency(product.price)}
               </span>
             </>
           ) : (
             <span style={{ 
-              color: "#ff4a17", 
-              fontWeight: "600", 
+              color: "#333", 
+              fontWeight: "700", 
               fontSize: "18px"
             }}>
-              {formatCurrency(product.price || product.priceBeforeSale || 0)}
+              {formatCurrency(product.priceBeforeSale || product.price)}
             </span>
           )}
         </div>
