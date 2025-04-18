@@ -203,7 +203,7 @@ const handleVnpayReturn = async (req, res) => {
  */
 const checkPaymentStatus = async (req, res) => {
     try {
-        const { orderId } = req.params;
+        const { orderId, paymentMethod } = req.params;
         
         if (!orderId) {
             return res.status(400).json({
@@ -221,13 +221,53 @@ const checkPaymentStatus = async (req, res) => {
                 message: 'Không tìm thấy đơn hàng'
             });
         }
+
+        // Nếu đã thanh toán rồi, trả về trạng thái hiện tại
+        if (order.paymentStatus === 'Đã thanh toán') {
+            return res.status(200).json({
+                success: true,
+                data: {
+                    paymentStatus: order.paymentStatus,
+                    paymentMethod: order.paymentMethod,
+                    amount: order.totalAmount,
+                    orderId: order.orderId
+                }
+            });
+        }
         
+        // Kiểm tra theo phương thức thanh toán
+        if (order.paymentMethod === 'Thanh toán qua Momo') {
+            // Nếu thanh toán qua Momo và chưa hoàn thành, chủ động kiểm tra với Momo API
+            console.log('Chủ động kiểm tra trạng thái thanh toán Momo cho đơn hàng:', orderId);
+            
+            if (order.momoPaymentInfo && order.momoPaymentInfo.orderId) {
+                const momoResult = await momoService.checkPaymentStatus(order.momoPaymentInfo.orderId);
+                
+                if (momoResult.success) {
+                    // Nếu đã cập nhật thành công từ Momo API
+                    return res.status(200).json({
+                        success: true,
+                        message: momoResult.message,
+                        data: {
+                            paymentStatus: momoResult.order ? momoResult.order.paymentStatus : order.paymentStatus,
+                            paymentMethod: order.paymentMethod,
+                            amount: order.totalAmount,
+                            orderId: order.orderId,
+                            isPending: momoResult.isPending || false
+                        }
+                    });
+                }
+            }
+        }
+        
+        // Trả về trạng thái hiện tại nếu không có cập nhật từ các API thanh toán
         return res.status(200).json({
             success: true,
             data: {
                 paymentStatus: order.paymentStatus,
                 paymentMethod: order.paymentMethod,
-                orderStatus: order.status
+                amount: order.totalAmount,
+                orderId: order.orderId
             }
         });
     } catch (error) {
