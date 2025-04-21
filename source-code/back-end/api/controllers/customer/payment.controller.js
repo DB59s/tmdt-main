@@ -314,7 +314,8 @@ const createSolanaPayment = async (req, res) => {
             });
         }
         
-        // Generate Solana payment URL
+        // Generate payment URL - Không cập nhật trạng thái đơn hàng ở đây
+        // Chỉ tạo URL thanh toán, đơn hàng sẽ được cập nhật sau khi thanh toán thành công
         const paymentResult = await solanaService.generatePaymentUrl(order);
         
         if (!paymentResult.success) {
@@ -363,6 +364,30 @@ const verifySolanaPayment = async (req, res) => {
         // Verify the payment
         const verificationResult = await solanaService.verifyPayment(reference);
         
+        if (verificationResult.success && verificationResult.verified) {
+            // Tìm đơn hàng liên quan đến giao dịch này
+            const order = await Order.findOne({
+                'solanaPaymentInfo.reference': reference
+            });
+            
+            if (order) {
+                // Cập nhật trạng thái đơn hàng thành 'Đã thanh toán'
+                await Order.findByIdAndUpdate(order._id, {
+                    paymentMethod: 'Thanh toán qua Solana',
+                    paymentStatus: 'Đã thanh toán'
+                });
+            }
+        } else if (!verificationResult.success) {
+            // Nếu xác minh thất bại, có thể xem xét hủy đơn hàng hoặc đánh dấu lỗi
+            const order = await Order.findOne({
+                'solanaPaymentInfo.reference': reference
+            });
+            
+            if (order) {
+                console.log(`Thanh toán Solana thất bại cho đơn hàng ${order.orderId}: ${verificationResult.message}`);
+            }
+        }
+        
         return res.status(200).json({
             success: verificationResult.success,
             verified: verificationResult.verified || false,
@@ -376,7 +401,7 @@ const verifySolanaPayment = async (req, res) => {
         console.error('Error verifying Solana payment:', error);
         return res.status(500).json({
             success: false,
-            message: 'Lỗi khi xác minh thanh toán Solana'
+            message: 'Lỗi khi xác minh thanh toán Solana: ' + error.message
         });
     }
 };
@@ -394,6 +419,23 @@ const handleSolanaWebhook = async (req, res) => {
         // Handle webhook notification
         const result = await solanaService.handleWebhook(webhookData);
         
+        // Nếu thanh toán được xác nhận qua webhook, cập nhật trạng thái đơn hàng
+        if (result.success && result.verified) {
+            const order = await Order.findOne({
+                'solanaPaymentInfo.reference': webhookData.reference
+            });
+            
+            if (order) {
+                // Cập nhật trạng thái đơn hàng thành 'Đã thanh toán'
+                await Order.findByIdAndUpdate(order._id, {
+                    paymentMethod: 'Thanh toán qua Solana',
+                    paymentStatus: 'Đã thanh toán'
+                });
+                
+                console.log(`Đơn hàng ${order.orderId} đã được cập nhật thành 'Đã thanh toán' qua webhook`);
+            }
+        }
+        
         // Return response
         return res.status(200).json({
             status: result.success ? 'success' : 'error',
@@ -404,6 +446,59 @@ const handleSolanaWebhook = async (req, res) => {
         return res.status(500).json({
             status: 'error',
             message: 'Internal server error'
+        });
+    }
+};
+
+/**
+ * Poll Solana payment status until confirmed or timeout
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {Object} - Response with verification result
+ */
+const pollSolanaPayment = async (req, res) => {
+    try {
+        const { reference } = req.params;
+        
+        if (!reference) {
+            return res.status(400).json({
+                success: false,
+                message: 'Mã tham chiếu không được cung cấp'
+            });
+        }
+        
+        // Poll payment status with multiple attempts
+        const result = await solanaService.pollPaymentStatus(reference, 10, 3000);
+        
+        if (result.verified) {
+            // Tìm đơn hàng liên quan đến giao dịch này
+            const order = await Order.findOne({
+                'solanaPaymentInfo.reference': reference
+            });
+            
+            if (order) {
+                // Cập nhật trạng thái đơn hàng thành 'Đã thanh toán'
+                await Order.findByIdAndUpdate(order._id, {
+                    paymentMethod: 'Thanh toán qua Solana',
+                    paymentStatus: 'Đã thanh toán'
+                });
+            }
+        }
+        
+        return res.status(200).json({
+            success: result.success,
+            verified: result.verified || false,
+            message: result.message,
+            data: result.success ? {
+                transactionId: result.transactionId,
+                orderId: result.order
+            } : null
+        });
+    } catch (error) {
+        console.error('Error polling Solana payment:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Lỗi khi theo dõi trạng thái thanh toán Solana: ' + error.message
         });
     }
 };
@@ -583,6 +678,7 @@ module.exports = {
     createSolanaPayment,
     verifySolanaPayment,
     handleSolanaWebhook,
+    pollSolanaPayment,
     createUsdtPayment,
     verifyUsdtPayment,
     confirmUsdtPayment,

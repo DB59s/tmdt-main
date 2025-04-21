@@ -134,7 +134,8 @@ const verifyPayment = async (reference) => {
             return {
                 success: false,
                 verified: false,
-                message: 'Chưa tìm thấy giao dịch thanh toán'
+                message: 'Chưa tìm thấy giao dịch thanh toán',
+                order: order.orderId
             };
         }
         
@@ -145,7 +146,41 @@ const verifyPayment = async (reference) => {
             return {
                 success: false,
                 verified: false,
-                message: 'Không thể xác minh giao dịch'
+                message: 'Không thể xác minh giao dịch',
+                order: order.orderId
+            };
+        }
+        
+        // Verify the transaction is valid and contains payment to merchant wallet
+        const merchantWallet = new PublicKey(solanaConfig.MERCHANT_WALLET);
+        let isValidPayment = false;
+        
+        // Check if transaction contains a transfer to the merchant wallet
+        if (transaction && transaction.meta && transaction.meta.postTokenBalances) {
+            // Check for token transfers
+            isValidPayment = transaction.meta.postTokenBalances.some(balance => 
+                balance.owner === merchantWallet.toString()
+            );
+        }
+        
+        // If no token transfers, check for SOL transfers
+        if (!isValidPayment && transaction.meta && transaction.meta.postBalances) {
+            const accountKeys = transaction.transaction.message.accountKeys;
+            const merchantIndex = accountKeys.findIndex(key => key.toString() === merchantWallet.toString());
+            
+            if (merchantIndex >= 0) {
+                const preBalance = transaction.meta.preBalances[merchantIndex];
+                const postBalance = transaction.meta.postBalances[merchantIndex];
+                isValidPayment = postBalance > preBalance;
+            }
+        }
+        
+        if (!isValidPayment) {
+            return {
+                success: false,
+                verified: false,
+                message: 'Giao dịch không hợp lệ hoặc không phải thanh toán đến ví merchant',
+                order: order.orderId
             };
         }
         
@@ -169,7 +204,7 @@ const verifyPayment = async (reference) => {
         return {
             success: false,
             verified: false,
-            message: 'Lỗi khi xác minh thanh toán'
+            message: 'Lỗi khi xác minh thanh toán: ' + error.message
         };
     }
 };
@@ -184,7 +219,7 @@ const handleWebhook = async (webhookData) => {
         console.log('Received webhook from Solana Pay:', JSON.stringify(webhookData, null, 2));
         
         // Extract reference from webhook data
-        const { reference, signature } = webhookData;
+        const { reference, signature, status } = webhookData;
         
         if (!reference) {
             return {
@@ -193,20 +228,80 @@ const handleWebhook = async (webhookData) => {
             };
         }
         
-        // Verify the payment
+        // Find the order with this reference
+        const order = await Order.findOne({
+            'solanaPaymentInfo.reference': reference
+        });
+        
+        if (!order) {
+            return {
+                success: false,
+                message: 'Không tìm thấy đơn hàng với mã tham chiếu này'
+            };
+        }
+        
+        // If webhook includes a status and it's 'confirmed' or 'finalized', mark as paid immediately
+        if (status && ['confirmed', 'finalized'].includes(status.toLowerCase())) {
+            await Order.findByIdAndUpdate(order._id, {
+                paymentStatus: 'Đã thanh toán',
+                'solanaPaymentInfo.transactionId': signature || 'webhook-confirmed',
+                'solanaPaymentInfo.paymentDate': new Date(),
+                'solanaPaymentInfo.verified': true
+            });
+            
+            return {
+                success: true,
+                verified: true,
+                message: 'Thanh toán đã được xác nhận qua webhook',
+                transactionId: signature || 'webhook-confirmed',
+                order: order.orderId
+            };
+        }
+        
+        // If no status or not confirmed, verify the payment on-chain
         return await verifyPayment(reference);
     } catch (error) {
         console.error('Solana webhook handling error:', error);
         return {
             success: false,
-            message: 'Error processing payment notification'
+            message: 'Lỗi khi xử lý thông báo thanh toán: ' + error.message
         };
     }
+};
+
+/**
+ * Check payment status periodically
+ * @param {string} reference - Payment reference
+ * @param {number} maxAttempts - Maximum number of verification attempts
+ * @param {number} intervalMs - Interval between attempts in milliseconds
+ * @returns {Promise<Object>} - Final verification result
+ */
+const pollPaymentStatus = async (reference, maxAttempts = 10, intervalMs = 3000) => {
+    let attempts = 0;
+    
+    while (attempts < maxAttempts) {
+        const result = await verifyPayment(reference);
+        
+        if (result.verified) {
+            return result;
+        }
+        
+        // Wait before next attempt
+        await new Promise(resolve => setTimeout(resolve, intervalMs));
+        attempts++;
+    }
+    
+    return {
+        success: false,
+        verified: false,
+        message: 'Hết thời gian chờ xác minh thanh toán'
+    };
 };
 
 module.exports = {
     generatePaymentUrl,
     verifyPayment,
     handleWebhook,
-    convertVndToSol
+    convertVndToSol,
+    pollPaymentStatus
 };
