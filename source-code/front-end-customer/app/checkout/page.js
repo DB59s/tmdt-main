@@ -451,8 +451,8 @@ const checkSolanaPaymentStatus = async (reference) => {
             
             if (paymentMethod === 'momo') {
                 mappedPaymentMethod = 'Thanh toán qua Momo'
-            } else if (paymentMethod === 'usdt') {
-                mappedPaymentMethod = 'Thanh toán qua USDT'
+            // } else if (paymentMethod === 'usdt') {
+            //     mappedPaymentMethod = 'Thanh toán qua USDT'
             } else if (paymentMethod === 'solana') {
                 mappedPaymentMethod = 'Thanh toán qua Solana'
             }
