@@ -23,6 +23,9 @@ router.post('/solana/create-payment', paymentController.createSolanaPayment);
 // Verify Solana payment
 router.get('/solana/verify/:reference', paymentController.verifySolanaPayment);
 
+// Poll Solana payment status
+router.get('/solana/poll/:reference', paymentController.pollSolanaPayment);
+
 // Handle webhook from Solana Pay
 router.post('/solana/webhook', paymentController.handleSolanaWebhook);
 

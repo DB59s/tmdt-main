@@ -258,6 +258,62 @@ const checkPaymentStatus = async (req, res) => {
                     });
                 }
             }
+        } else if (order.paymentMethod === 'Thanh toán qua Solana') {
+            // Nếu thanh toán qua Solana và chưa hoàn thành, chủ động kiểm tra với Solana API
+            console.log('Chủ động kiểm tra trạng thái thanh toán Solana cho đơn hàng:', orderId);
+            
+            if (order.solanaPaymentInfo && order.solanaPaymentInfo.reference) {
+                // Kiểm tra trạng thái thanh toán Solana
+                const solanaResult = await solanaService.verifyPayment(order.solanaPaymentInfo.reference);
+                
+                if (solanaResult.success && solanaResult.verified) {
+                    // Nếu thanh toán đã được xác minh, cập nhật trạng thái đơn hàng
+                    await Order.findByIdAndUpdate(order._id, {
+                        paymentStatus: 'Đã thanh toán',
+                        'solanaPaymentInfo.verified': true,
+                        'solanaPaymentInfo.transactionId': solanaResult.transactionId,
+                        'solanaPaymentInfo.paymentDate': new Date()
+                    });
+                    
+                    return res.status(200).json({
+                        success: true,
+                        message: 'Thanh toán Solana đã được xác nhận',
+                        data: {
+                            paymentStatus: 'Đã thanh toán',
+                            paymentMethod: order.paymentMethod,
+                            amount: order.totalAmount,
+                            orderId: order.orderId,
+                            transactionId: solanaResult.transactionId
+                        }
+                    });
+                } else {
+                    // Nếu chưa xác minh được, thử sử dụng polling
+                    console.log('Thử polling trạng thái thanh toán Solana');
+                    const pollResult = await solanaService.pollPaymentStatus(order.solanaPaymentInfo.reference, 3, 1000);
+                    
+                    if (pollResult.success && pollResult.verified) {
+                        // Nếu polling thành công, cập nhật trạng thái đơn hàng
+                        await Order.findByIdAndUpdate(order._id, {
+                            paymentStatus: 'Đã thanh toán',
+                            'solanaPaymentInfo.verified': true,
+                            'solanaPaymentInfo.transactionId': pollResult.transactionId,
+                            'solanaPaymentInfo.paymentDate': new Date()
+                        });
+                        
+                        return res.status(200).json({
+                            success: true,
+                            message: 'Thanh toán Solana đã được xác nhận qua polling',
+                            data: {
+                                paymentStatus: 'Đã thanh toán',
+                                paymentMethod: order.paymentMethod,
+                                amount: order.totalAmount,
+                                orderId: order.orderId,
+                                transactionId: pollResult.transactionId
+                            }
+                        });
+                    }
+                }
+            }
         }
         
         // Trả về trạng thái hiện tại nếu không có cập nhật từ các API thanh toán
@@ -274,7 +330,7 @@ const checkPaymentStatus = async (req, res) => {
         console.error('Error checking payment status:', error);
         return res.status(500).json({
             success: false,
-            message: 'Lỗi khi kiểm tra trạng thái thanh toán'
+            message: 'Lỗi khi kiểm tra trạng thái thanh toán: ' + error.message
         });
     }
 };

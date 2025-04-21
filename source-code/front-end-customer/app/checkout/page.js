@@ -314,7 +314,7 @@ export default function Checkout() {
             setCheckingPayment(true)
             
             // Gọi API kiểm tra trạng thái thanh toán
-            const response = await fetch(`${process.env.domainApi}/api/customer/payment/check-status/${orderId}`)
+            const response = await fetch(`${process.env.domainApi}/api/customer/payment/status/${orderId}`)
             const data = await response.json()
             
             if (response.ok && data.success) {
@@ -353,17 +353,45 @@ export default function Checkout() {
     }
     
     // Thêm hàm bắt đầu kiểm tra trạng thái thanh toán
-    const startPaymentStatusPolling = (orderId) => {
-        // Kiểm tra ngay lập tức
-        checkPaymentStatus(orderId)
-        
-        // Sau đó kiểm tra mỗi 5 giây
-        const interval = setInterval(() => {
-            checkPaymentStatus(orderId)
-        }, 5000)
-        
-        setPaymentPollingInterval(interval)
+const startPaymentStatusPolling = (orderId) => {
+    if (paymentMethod === 'solana' && solanaPaymentData?.reference) {
+      // Kiểm tra ngay lập tức
+      checkSolanaPaymentStatus(solanaPaymentData.reference);
+      
+      // Sau đó kiểm tra mỗi 5 giây
+      const interval = setInterval(() => {
+        checkSolanaPaymentStatus(solanaPaymentData.reference);
+      }, 5000);
+      
+      setPaymentPollingInterval(interval);
+    } else {
+      // Xử lý cho các phương thức thanh toán khác
+      checkPaymentStatus(orderId);
+      
+      const interval = setInterval(() => {
+        checkPaymentStatus(orderId);
+      }, 5000);
+      
+      setPaymentPollingInterval(interval);
     }
+  };
+
+  // Thêm hàm kiểm tra trạng thái thanh toán Solana
+const checkSolanaPaymentStatus = async (reference) => {
+    try {
+      const response = await fetch(`${process.env.domainApi}/api/customer/payment/solana/poll/${reference}`);
+      const data = await response.json();
+      
+      if (response.ok && data.success && data.verified) {
+        // Nếu thanh toán đã được xác minh
+        stopPaymentStatusPolling();
+        toast.success('Thanh toán Solana thành công!');
+        router.push(`/order-tracking?id=${orderId}`);
+      }
+    } catch (error) {
+      console.error('Error checking Solana payment status:', error);
+    }
+  };
     
     // Thêm hàm dừng kiểm tra trạng thái thanh toán
     const stopPaymentStatusPolling = () => {

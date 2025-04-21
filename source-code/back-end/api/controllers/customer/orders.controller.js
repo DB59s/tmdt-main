@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Order = require('../../models/order.model');
 const OrderItem = require('../../models/orderItem.model');
 const { sendOrderStatusEmail, sendEmailSuccess } = require('../../../config/mailer');
@@ -6,7 +7,6 @@ const Product = require('../../models/products.model');
 const OrderTracking = require('../../models/orderTracking.model');
 const RefundRequest = require('../../models/refundRequest.model');
 const transporter = require('../../../config/mailer').transporter;
-const mongoose = require('mongoose');
 
 function roundToTwo(num) {
     return Math.round(num * 100) / 100;
@@ -218,8 +218,22 @@ module.exports.getOrderById = async (req, res) => {
     try {
         console.log("Get order by ID:", req.params.id);
 
-        // Find the order
-        const order = await Order.findById(req.params.id);
+        // Tìm đơn hàng theo _id hoặc orderId
+        let order = null;
+        
+        // Trước tiên, thử tìm theo _id (MongoDB ID)
+        try {
+            if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+                order = await Order.findById(req.params.id);
+            }
+        } catch (idError) {
+            console.log('Not a valid MongoDB ID, trying orderId instead');
+        }
+        
+        // Nếu không tìm thấy theo _id, thử tìm theo orderId (mã đơn hàng)
+        if (!order) {
+            order = await Order.findOne({ orderId: req.params.id });
+        }
         
         if (!order) {
             return res.status(404).json({

@@ -10,7 +10,15 @@ const solanaConfig = require('../../config/solana.config');
  * Get current SOL to USD exchange rate
  * @returns {Promise<number>} - Current SOL price in USD
  */
+
+
 const getSolanaPrice = async () => {
+    console.log('Fetching Solana price...');
+    console.log(solanaConfig.MERCHANT_WALLET);
+    console.log(solanaConfig.USD_TO_VND_RATE);
+    console.log(solanaConfig.LABEL);
+    console.log(solanaConfig.NETWORK);
+    
     try {
         const response = await axios.get(solanaConfig.CURRENCY_API);
         return response.data.solana.usd;
@@ -105,17 +113,24 @@ const generatePaymentUrl = async (order) => {
  */
 const verifyPayment = async (reference) => {
     try {
+        console.log(`[Solana] Verifying payment for reference: ${reference}`);
+        console.log(`[Solana] Network: ${solanaConfig.NETWORK}`);
+        console.log(`[Solana] Merchant wallet: ${solanaConfig.MERCHANT_WALLET}`);
+        
         // Find the order with this reference
         const order = await Order.findOne({
             'solanaPaymentInfo.reference': reference
         });
         
         if (!order) {
+            console.log(`[Solana] Order not found for reference: ${reference}`);
             return {
                 success: false,
                 message: 'Không tìm thấy đơn hàng'
             };
         }
+        
+        console.log(`[Solana] Found order: ${order.orderId} with payment status: ${order.paymentStatus}`);
         
         // Connect to Solana network
         const connection = new Connection(
@@ -124,13 +139,19 @@ const verifyPayment = async (reference) => {
                 : 'https://api.devnet.solana.com'
         );
         
+        console.log(`[Solana] Connected to ${solanaConfig.NETWORK === 'mainnet-beta' ? 'mainnet' : 'devnet'}`);
+        
         // Convert reference string back to PublicKey
         const referencePublicKey = new PublicKey(reference);
+        console.log(`[Solana] Reference public key: ${referencePublicKey.toString()}`);
         
         // Get all signatures for the reference
+        console.log(`[Solana] Getting signatures for address: ${referencePublicKey.toString()}`);
         const signatures = await connection.getSignaturesForAddress(referencePublicKey);
+        console.log(`[Solana] Found ${signatures.length} signatures`);
         
         if (signatures.length === 0) {
+            console.log(`[Solana] No transactions found for reference: ${reference}`);
             return {
                 success: false,
                 verified: false,
@@ -139,10 +160,17 @@ const verifyPayment = async (reference) => {
             };
         }
         
+        // Log all signatures found
+        signatures.forEach((sig, index) => {
+            console.log(`[Solana] Signature ${index + 1}: ${sig.signature}`);
+        });
+        
         // Get the most recent transaction
+        console.log(`[Solana] Getting transaction details for signature: ${signatures[0].signature}`);
         const transaction = await connection.getTransaction(signatures[0].signature);
         
         if (!transaction) {
+            console.log(`[Solana] Transaction details not found for signature: ${signatures[0].signature}`);
             return {
                 success: false,
                 verified: false,
@@ -151,31 +179,67 @@ const verifyPayment = async (reference) => {
             };
         }
         
+        console.log(`[Solana] Transaction found with ${transaction.transaction.message.accountKeys.length} accounts`);
+        
         // Verify the transaction is valid and contains payment to merchant wallet
         const merchantWallet = new PublicKey(solanaConfig.MERCHANT_WALLET);
+        console.log(`[Solana] Merchant wallet: ${merchantWallet.toString()}`);
+        
         let isValidPayment = false;
         
         // Check if transaction contains a transfer to the merchant wallet
         if (transaction && transaction.meta && transaction.meta.postTokenBalances) {
+            console.log(`[Solana] Checking token transfers in transaction`);
+            console.log(`[Solana] Post token balances:`, JSON.stringify(transaction.meta.postTokenBalances));
+            
             // Check for token transfers
-            isValidPayment = transaction.meta.postTokenBalances.some(balance => 
-                balance.owner === merchantWallet.toString()
-            );
+            isValidPayment = transaction.meta.postTokenBalances.some(balance => {
+                const isMatch = balance.owner === merchantWallet.toString();
+                if (isMatch) {
+                    console.log(`[Solana] Found token transfer to merchant wallet`);
+                }
+                return isMatch;
+            });
         }
         
         // If no token transfers, check for SOL transfers
         if (!isValidPayment && transaction.meta && transaction.meta.postBalances) {
+            console.log(`[Solana] Checking SOL transfers in transaction`);
+            
             const accountKeys = transaction.transaction.message.accountKeys;
-            const merchantIndex = accountKeys.findIndex(key => key.toString() === merchantWallet.toString());
+            console.log(`[Solana] Account keys in transaction:`, accountKeys.map(key => key.toString()));
+            
+            console.log(`[Solana] Searching for merchant wallet in transaction accounts`);
+            const merchantIndex = accountKeys.findIndex(key => {
+                const isMatch = key.toString() === merchantWallet.toString();
+                return isMatch;
+            });
+            
+            if (merchantIndex >= 0) {
+                console.log(`[Solana] Found merchant wallet in transaction accounts at index ${merchantIndex}`);
+            }
             
             if (merchantIndex >= 0) {
                 const preBalance = transaction.meta.preBalances[merchantIndex];
                 const postBalance = transaction.meta.postBalances[merchantIndex];
+                
+                console.log(`[Solana] Merchant wallet balance before: ${preBalance / LAMPORTS_PER_SOL} SOL`);
+                console.log(`[Solana] Merchant wallet balance after: ${postBalance / LAMPORTS_PER_SOL} SOL`);
+                
                 isValidPayment = postBalance > preBalance;
+                
+                if (isValidPayment) {
+                    console.log(`[Solana] Valid payment confirmed: Balance increased by ${(postBalance - preBalance) / LAMPORTS_PER_SOL} SOL`);
+                } else {
+                    console.log(`[Solana] Invalid payment: Balance did not increase`);
+                }
+            } else {
+                console.log(`[Solana] Merchant wallet not found in transaction accounts`);
             }
         }
         
         if (!isValidPayment) {
+            console.log(`[Solana] Payment validation failed for order: ${order.orderId}`);
             return {
                 success: false,
                 verified: false,
@@ -185,6 +249,7 @@ const verifyPayment = async (reference) => {
         }
         
         // Update order payment status
+        console.log(`[Solana] Updating order ${order.orderId} to 'Đã thanh toán'`);
         await Order.findByIdAndUpdate(order._id, {
             paymentStatus: 'Đã thanh toán',
             'solanaPaymentInfo.transactionId': signatures[0].signature,
@@ -192,6 +257,7 @@ const verifyPayment = async (reference) => {
             'solanaPaymentInfo.verified': true
         });
         
+        console.log(`[Solana] Payment verified successfully for order: ${order.orderId}`);
         return {
             success: true,
             verified: true,
@@ -200,7 +266,7 @@ const verifyPayment = async (reference) => {
             order: order.orderId
         };
     } catch (error) {
-        console.error('Error verifying Solana payment:', error);
+        console.error('[Solana] Error verifying payment:', error);
         return {
             success: false,
             verified: false,
