@@ -506,15 +506,15 @@ const checkSolanaPaymentStatus = async (reference) => {
                     toast.warning('Không thể tạo mã QR Momo, nhưng đơn hàng của bạn đã được ghi nhận.')
                     router.push(`/order-tracking?id=${newOrderId}`)
                 }
-            } else if (paymentMethod === 'usdt') {
-                // Tạo thông tin thanh toán USDT và hiển thị modal
-                const usdtSuccess = await generateUsdtPayment(orderCode)
+            // } else if (paymentMethod === 'usdt') {
+            //     // Tạo thông tin thanh toán USDT và hiển thị modal
+            //     const usdtSuccess = await generateUsdtPayment(orderCode)
                 
-                if (!usdtSuccess) {
-                    // Nếu không thể tạo thông tin thanh toán, vẫn chuyển hướng đến trang đơn hàng
-                    toast.warning('Không thể tạo thông tin thanh toán USDT, nhưng đơn hàng của bạn đã được ghi nhận.')
-                    router.push(`/order-tracking?id=${newOrderId}`)
-                }
+            //     if (!usdtSuccess) {
+            //         // Nếu không thể tạo thông tin thanh toán, vẫn chuyển hướng đến trang đơn hàng
+            //         toast.warning('Không thể tạo thông tin thanh toán USDT, nhưng đơn hàng của bạn đã được ghi nhận.')
+            //         router.push(`/order-tracking?id=${newOrderId}`)
+            //     }
             } else if (paymentMethod === 'solana') {
                 // Tạo thông tin thanh toán Solana và hiển thị modal
                 const solanaSuccess = await generateSolanaPayment(orderCode)
@@ -854,35 +854,10 @@ const checkSolanaPaymentStatus = async (reference) => {
                                                                     onChange={() => setPaymentMethod('cod')}
                                                                 />
                                                                 <label htmlFor="payment-cod">
-                                                                    <span className="payment-option-title">Cash on Delivery</span>
-                                                                    <span className="payment-option-desc">Pay with cash when your order is delivered.</span>
+                                                                    <span className="payment-option-title">COD</span>
+                                                                    <div className="payment-option-desc">thanh toán khi nhận hàng</div>
                                                                 </label>
                                                             </div>
-                                                            <div className="payment-option mb-15">
-                                                                <input 
-                                                                    type="radio" 
-                                                                    id="payment-usdt" 
-                                                                    name="payment-method" 
-                                                                    checked={paymentMethod === 'usdt'}
-                                                                    onChange={() => setPaymentMethod('usdt')}
-                                                                />
-                                                                <label htmlFor="payment-usdt">
-                                                                    <span className="payment-option-title">
-                                                                        <img 
-                                                                            src="/assets/img/payment/usdt-logo.png" 
-                                                                            alt="USDT" 
-                                                                            style={{ 
-                                                                                height: '20px', 
-                                                                                marginRight: '8px',
-                                                                                verticalAlign: 'middle' 
-                                                                            }} 
-                                                                        />
-                                                                        Thanh toán qua USDT (TRC20)
-                                                                    </span>
-                                                                    <span className="payment-option-desc">Chuyển USDT qua mạng TRC20 để thanh toán.</span>
-                                                                </label>
-                                                            </div>
-                                                            
                                                             <div className="payment-option mb-15">
                                                                 <input 
                                                                     type="radio" 
@@ -904,7 +879,7 @@ const checkSolanaPaymentStatus = async (reference) => {
                                                                         />
                                                                         Thanh toán qua Solana Pay
                                                                     </span>
-                                                                    <span className="payment-option-desc">Thanh toán nhanh chóng và an toàn với Solana Pay.</span>
+                                                                    <div className="payment-option-desc">Thanh toán nhanh chóng và an toàn với Solana Pay.</div>
                                                                 </label>
                                                             </div>
                                                             
@@ -929,7 +904,7 @@ const checkSolanaPaymentStatus = async (reference) => {
                                                                         />
                                                                         Thanh toán qua Momo
                                                                     </span>
-                                                                    <span className="payment-option-desc">Quét mã QR hoặc mở app Momo để thanh toán.</span>
+                                                                    <div className="payment-option-desc">Quét mã QR hoặc mở app Momo để thanh toán.</div>
                                                                 </label>
                                                             </div>
                                                             
