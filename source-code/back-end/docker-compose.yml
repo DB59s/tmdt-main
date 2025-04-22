@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  backend:
+    build: .
+    container_name: tmdt-backend
+    ports:
+      - "9006:9006"
+    environment:
+      - NODE_ENV=production
+      - VIRTUAL_HOST=vuquangduy.io.online
+      - VIRTUAL_PORT=9006
+    volumes:
+      - ./uploads:/usr/src/app/uploads
+      - ./.env.production:/usr/src/app/.env.production
+    restart: always
+    networks:
+      - web
+
+networks:
+  web:
+    external: true
