@@ -1,0 +1,12 @@
+version: '3'
+services:
+  frontend:
+    build: .
+    container_name: tmdt-fe-customer
+    ports:
+      - "9005:9005"
+    environment:
+      - NODE_ENV=production
+      - PORT=9005
+      - NEXT_PUBLIC_DOMAIN=vuquangduy.online
+    restart: always
