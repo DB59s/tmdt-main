@@ -2,7 +2,7 @@
 import { DataTable } from 'mantine-datatable';
 import { useEffect, useState, useCallback } from 'react';
 import sortBy from 'lodash/sortBy';
-import axios from 'axios'; 
+import axios from 'axios';
 import IconTrashLines from '@/components/icon/icon-trash-lines';
 import IconPencilPaper from '@/components/icon/icon-pencil-paper';
 import IconCalculator from '@/components/icon/icon-calculator';
@@ -21,7 +21,7 @@ const ProductsList = () => {
     const [selectedRecords, setSelectedRecords] = useState([]);
     const [search, setSearch] = useState('');
     const [sortStatus, setSortStatus] = useState({
-        columnAccessor: 'id',
+        columnAccessor: '_id',
         direction: 'asc',
     });
     const [totalRecords, setTotalRecords] = useState(0);
@@ -66,7 +66,7 @@ const ProductsList = () => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await axios.get(`${apiUrl}/api/customer/categories`); 
+                const response = await axios.get(`${apiUrl}/api/customer/categories`);
                 setCategories(response.data);
             } catch (error) {
                 console.error('Error fetching categories:', error);
@@ -86,8 +86,8 @@ const ProductsList = () => {
 
     useEffect(() => {
         const data = sortBy(initialRecords, sortStatus.columnAccessor);
-        setInitialRecords(sortStatus.direction === 'desc' ? data.reverse() : data);
-    }, [sortStatus]);
+        setRecordsData(sortStatus.direction === 'desc' ? data.reverse() : data);
+    }, [sortStatus, initialRecords]);
 
     const handleEdit = (id) => {
         router.push(`/manage-products/edit/${id}`);
@@ -128,14 +128,14 @@ const ProductsList = () => {
         if (!confirm('This will recalculate original prices for all products based on discount percentage. Continue?')) {
             return;
         }
-        
+
         try {
             const response = await axios.post(`${apiUrl}/api/admin/products/calculate-all-prices`, {}, {
                 headers: {
                     authorization: `${sessionStorage.getItem('token')}`
                 }
             });
-            
+
             alert(`Success: ${response.data.message}`);
             fetchProducts();
         } catch (error) {
@@ -172,8 +172,8 @@ const ProductsList = () => {
                     </Link>
                 </div>
                 <div className="ltr:ml-auto rtl:mr-auto">
-                    <button 
-                        className="btn btn-outline-primary mb-2 md:mb-0" 
+                    <button
+                        className="btn btn-outline-primary mb-2 md:mb-0"
                         onClick={() => setShowFilters(!showFilters)}
                     >
                         {showFilters ? 'Hide Filters' : 'Show Filters'}
@@ -190,7 +190,7 @@ const ProductsList = () => {
                             className="form-input w-full"
                             placeholder="Search..."
                             value={search}
-                            onChange={(e) => setSearch(e.target.value)} 
+                            onChange={(e) => setSearch(e.target.value)}
                         />
                     </div>
                     <div>
@@ -271,14 +271,15 @@ const ProductsList = () => {
                 <DataTable
                     className="table-hover whitespace-nowrap"
                     records={recordsData}
+                    idAccessor="_id"
                     columns={[
-                        { 
+                        {
                             accessor: 'title',
                             title: 'Title',
                             sortable: true,
                             width: '20%'
                         },
-                        { 
+                        {
                             accessor: 'categoryId',
                             title: 'Category',
                             sortable: true,
@@ -287,27 +288,27 @@ const ProductsList = () => {
                                 return category ? category.name : 'Unknown';
                             }
                         },
-                        { 
+                        {
                             accessor: 'price',
                             title: 'Current Price',
                             sortable: true,
                             render: ({ price }) => formatCurrency(price)
                         },
-                        { 
+                        {
                             accessor: 'priceBeforeSale',
                             title: 'Original Price',
                             sortable: true,
-                            render: ({ priceBeforeSale, price, onSale }) => 
+                            render: ({ priceBeforeSale, price, onSale }) =>
                                 onSale ? formatCurrency(priceBeforeSale || price) : '-'
                         },
-                        { 
+                        {
                             accessor: 'discountPercentage',
                             title: 'Discount',
                             sortable: true,
-                            render: ({ discountPercentage, onSale }) => 
+                            render: ({ discountPercentage, onSale }) =>
                                 onSale ? `${discountPercentage?.toFixed(2) || 0}%` : '-'
                         },
-                        { 
+                        {
                             accessor: 'stock',
                             title: 'Stock',
                             sortable: true
@@ -348,7 +349,9 @@ const ProductsList = () => {
                     sortStatus={sortStatus}
                     onSortStatusChange={setSortStatus}
                     selectedRecords={selectedRecords}
-                    onSelectedRecordsChange={setSelectedRecords}
+                    onSelectedRecordsChange={(records) => {
+                        setSelectedRecords(records);
+                    }}
                     minHeight={200}
                     paginationText={({ from, to, totalRecords }) => `Showing ${from} to ${to} of ${totalRecords} entries`}
                     loading={isLoading}
@@ -359,4 +362,4 @@ const ProductsList = () => {
     );
 };
 
-export default ProductsList; 
+export default ProductsList;
