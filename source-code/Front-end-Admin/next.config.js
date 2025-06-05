@@ -6,8 +6,8 @@ const nextConfig = {
         ignoreDuringBuilds: true,
     },
     env: {
-        domainApi: 'http://localhost:8080',
-        // domainApi: 'https://vuquangduy.io.vn',
+        // domainApi: 'http://localhost:8080',
+        domainApi: 'https://vuquangduy.io.vn',
     }
 };
 
