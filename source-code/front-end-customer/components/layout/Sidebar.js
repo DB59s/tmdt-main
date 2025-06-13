@@ -1,4 +1,5 @@
 import Link from "next/link"
+import SearchBox from "../elements/SearchBox"
 import MobileMenu from "./MobileMenu"
 
 export default function Sidebar({ isMobileMenu, handleMobileMenu }) {
@@ -8,10 +9,7 @@ export default function Sidebar({ isMobileMenu, handleMobileMenu }) {
                 <button className="tpsideinfo__close" onClick={handleMobileMenu}>Close<i className="fal fa-times ml-10" /></button>
                 <div className="tpsideinfo__search text-center pt-35">
                     <span className="tpsideinfo__search-title mb-20">What Are You Looking For?</span>
-                    <form action="#">
-                        <input type="text" placeholder="Search Products..." />
-                        <button><i className="fal fa-search" /></button>
-                    </form>
+                    <SearchBox showResults={false} placeholder="Search Products..." />
                 </div>
                 <div className="tpsideinfo__nabtab">
                     <ul className="nav nav-pills mb-3" id="pills-tab" role="tablist">

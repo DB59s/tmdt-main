@@ -1,5 +1,6 @@
 import CartShow from "@/components/elements/CartShow"
 import WishListShow from "@/components/elements/WishListShow"
+import SearchBox from "@/components/elements/SearchBox"
 import Link from "next/link"
 import HeaderMobSticky from "../HeaderMobSticky"
 import HeaderSticky from "../HeaderSticky"
@@ -129,12 +130,7 @@ export default function Header5({ scroll, isMobileMenu, handleMobileMenu, isCart
                                     </div>
                                     <div className="header-meta__search-5 ml-25">
                                         <div className="header-search-bar-5">
-                                            <form action="#">
-                                                <div className="search-info-5 p-relative">
-                                                    <button className="header-search-icon-5"><i className="fal fa-search" /></button>
-                                                    <input type="text" placeholder="Search products..." />
-                                                </div>
-                                            </form>
+                                            <SearchBox />
                                         </div>
                                     </div>
                                 </div>

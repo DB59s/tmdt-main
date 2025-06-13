@@ -1,6 +1,7 @@
 'use client'
 import CartShow from "@/components/elements/CartShow"
 import WishListShow from "@/components/elements/WishListShow"
+import SearchBox from "@/components/elements/SearchBox"
 import Link from "next/link"
 import { useState, useEffect } from "react"
 import HeaderMobSticky from "../HeaderMobSticky"
@@ -75,42 +76,21 @@ export default function Header3({ scroll, isMobileMenu, handleMobileMenu, isCart
                             <div className="col-xl-10 col-lg-9">
                                 <div className="header-meta-info d-flex align-items-center justify-content-between">
                                     <div className="header-search-bar">
-                                        <form action="#">
-                                            <div className="search-info p-relative">
-                                                <button className="header-search-icon"><i className="fal fa-search" /></button>
-                                                <input type="text" placeholder="Search products..." />
-                                            </div>
-                                        </form>
+                                        <SearchBox />
                                     </div>
                                     <div className="header-meta header-brand d-flex align-items-center">
-                                        <div className="header-meta__lang">
+                                    <div className="header-meta__lang">
                                             <ul>
                                                 <li>
                                                     <Link href="#">
-                                                        <img src="/assets/img/icon/lang-flag.png" alt="flag" />
-                                                        English
+                                                        <img src="/assets/img/icon/vietnam.png" alt="flag" style={{width: '20px', height: 'auto'}}/>Vietnamese
                                                         <span><i className="fal fa-angle-down" /></span>
                                                     </Link>
-                                                    <ul className="header-meta__lang-submenu">
-                                                        <li>
-                                                            <Link href="#">Arabic</Link>
-                                                        </li>
-                                                        <li>
-                                                            <Link href="#">Spanish</Link>
-                                                        </li>
-                                                        <li>
-                                                            <Link href="#">Mandarin</Link>
-                                                        </li>
-                                                    </ul>
                                                 </li>
                                             </ul>
                                         </div>
                                         <div className="header-meta__value mr-15">
-                                            <select>
-                                                <option>USD</option>
-                                                <option>YEAN</option>
-                                                <option>EURO</option>
-                                            </select>
+                                            <span>VNĐ</span>
                                         </div>
                                         <div className="header-meta__social d-flex align-items-center ml-25">
                                             <button className="header-cart p-relative tp-cart-toggle" onClick={handleCartSidebar}>

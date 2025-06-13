@@ -1,5 +1,6 @@
 import CartShow from "@/components/elements/CartShow"
 import WishListShow from "@/components/elements/WishListShow"
+import SearchBox from "@/components/elements/SearchBox"
 import Link from "next/link"
 import HeaderMobSticky from "../HeaderMobSticky"
 import HeaderSticky from "../HeaderSticky"
@@ -59,12 +60,7 @@ export default function Header2({ scroll, isMobileMenu, handleMobileMenu, isCart
                             <div className="col-lg-9">
                                 <div className="mainmenu d-flex align-items-center">
                                     <div className="mainmenu__search">
-                                        <form action="#">
-                                            <div className="mainmenu__search-bar p-relative">
-                                                <button className="mainmenu__search-icon"><i className="fal fa-search" /></button>
-                                                <input type="text" placeholder="Search products..." />
-                                            </div>
-                                        </form>
+                                        <SearchBox />
                                     </div>
                                     <div className="mainmenu__main d-flex align-items-center p-relative">
                                         <div className="main-menu">
@@ -165,6 +161,11 @@ export default function Header2({ scroll, isMobileMenu, handleMobileMenu, isCart
                                             <i className="fal fa-heart" />
                                             <WishListShow />
                                         </Link>
+                                    </div>
+                                    <div className="header-meta__search">
+                                        <div className="header-search-bar">
+                                            <SearchBox />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
