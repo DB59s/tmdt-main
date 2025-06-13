@@ -80,9 +80,6 @@ const SearchBox = ({ className = '', placeholder = "Search products...", showRes
     <div className={`search-box-wrapper ${className}`} style={{ position: 'relative' }}>
       <form onSubmit={handleSearch}>
         <div className="search-info p-relative">
-          <button type="submit" className="header-search-icon">
-            <i className="fal fa-search" />
-          </button>
           <input 
             type="text" 
             placeholder={placeholder}
@@ -96,6 +93,9 @@ const SearchBox = ({ className = '', placeholder = "Search products...", showRes
               setTimeout(() => setShowDropdown(false), 200)
             }}
           />
+          <button type="submit" className="header-search-icon">
+            <i className="fal fa-search" />
+          </button>
         </div>
       </form>
 
